@@ -40,5 +40,7 @@ protected:
 	void disconnect();
 
 	static void reportError(const char *message);
+
+	//static bool sendPacket(const OutputMemoryStream& packet, SOCKET socket);
 };
 

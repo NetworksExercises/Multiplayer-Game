@@ -23,6 +23,18 @@ void ModuleNetworking::reportError(const char* inOperationDesc)
 	ELOG("Error %s: %d- %s", inOperationDesc, errorNum, lpMsgBuf);
 }
 
+//bool ModuleNetworking::sendPacket(const OutputMemoryStream& packet, SOCKET socket)
+//{
+//	int result = send(socket, packet.GetBufferPtr(), packet.GetSize(), 0);
+//	if (result == SOCKET_ERROR)
+//	{
+//		reportError("send");
+//		return false;
+//	}
+//
+//	return true;
+//}
+
 void ModuleNetworking::disconnect()
 {
 	for (SOCKET socket : sockets)
