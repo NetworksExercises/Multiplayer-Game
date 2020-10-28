@@ -19,15 +19,13 @@ bool  ModuleNetworkingClient::start(const char * serverAddressStr, int serverPor
 
 	// - Create the remote address object
 	// --- Set address and port ---
-	sockaddr_in serverAddr; // client
-	serverAddr.sin_family = AF_INET; // IPv4
-	serverAddr.sin_port = htons(serverPort); // Port
-	//const char* remoteAddrStr = serverAddressStr;
-	inet_pton(AF_INET, serverAddressStr, &serverAddr.sin_addr);
+	serverAddress.sin_family = AF_INET; // IPv4
+	serverAddress.sin_port = htons(serverPort); // Port
+	inet_pton(AF_INET, serverAddressStr, &serverAddress.sin_addr);
 
 	// - Connect to the remote address
 	// --- Establish connection to server ---
-	connect(sk, (const struct sockaddr*)&serverAddr, sizeof(serverAddr));
+	connect(sk, (const struct sockaddr*)&serverAddress, sizeof(serverAddress));
 
 	// - Add the created socket to the managed list of sockets using addSocket()
 	addSocket(sk);
@@ -48,10 +46,13 @@ bool ModuleNetworkingClient::update()
 	if (state == ClientState::Start)
 	{
 		// TODO(jesus): Send the player name to the server
-		int iResult = send(sk, playerName.c_str(), playerName.size(), 0);
+		int iResult = send(sk, playerName.c_str(), playerName.size() + 1, 0);
 
 		if (iResult == SOCKET_ERROR)
+		{
 			reportError("ModuleNetworkingClient::update() - error on send");
+			return false;
+		}
 
 		state = ClientState::Logging;
 	}

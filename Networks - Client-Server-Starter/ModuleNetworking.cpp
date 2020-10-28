@@ -117,17 +117,23 @@ bool ModuleNetworking::preUpdate()
 				addSocket(connected_sk);
 			}
 			else
-			{
+			{       
+				
 				// It's a client socket
 				// Recv stuff
 				// On recv() success, communicate the incoming data received to the
 				// subclass (use the callback onSocketReceivedData()).
 				int iResult = recv(s, (char*)&incomingDataBuffer, incomingDataBufferSize, 0);
 
-				if (iResult == SOCKET_ERROR || iResult == 0 || iResult == ECONNRESET)
+				if (iResult == SOCKET_ERROR)
 				{
 					disconnectedSockets.push_back(s);
 					reportError("ModuleNetworking::preUpdate() - error on recv (disconnecting socket...)");
+					continue;
+				}
+				else if (iResult == 0)
+				{
+					disconnectedSockets.push_back(s);;
 					continue;
 				}
 

@@ -34,13 +34,19 @@ bool ModuleNetworkingServer::start(int port)
 	iResult = setsockopt(listenSocket, SOL_SOCKET, SO_REUSEADDR, (const char*)&enable, sizeof(int));
 
 	if (iResult == SOCKET_ERROR)
+	{
 		reportError("ModuleNetworkingServer::start() - error on setsockopt");
+		return false;
+	}
 
 	// - Bind the socket to a local interface
 	iResult = bind(listenSocket, (const struct sockaddr*)&serverAddr, sizeof(serverAddr));
 
 	if (iResult != NO_ERROR)
+	{
 		reportError("ModuleNetworkingServer::start() - error on bind");
+		return false;
+	}
 
 	// - Enter in listen mode
 	listen(listenSocket, 3);
