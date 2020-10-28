@@ -45,16 +45,17 @@ bool ModuleNetworkingClient::update()
 {
 	if (state == ClientState::Start)
 	{
-		// TODO(jesus): Send the player name to the server
-		int iResult = send(sk, playerName.c_str(), playerName.size() + 1, 0);
+		OutputMemoryStream packet;
+		packet << ClientMessage::Hello;
+		packet << playerName;
 
-		if (iResult == SOCKET_ERROR)
+		if (sendPacket(packet, sk))
+			state = ClientState::Logging;
+		else
 		{
-			reportError("ModuleNetworkingClient::update() - error on send");
-			return false;
+			disconnect();
+			state = ClientState::Stopped;
 		}
-
-		state = ClientState::Logging;
 	}
 
 	return true;
@@ -79,7 +80,7 @@ bool ModuleNetworkingClient::gui()
 	return true;
 }
 
-void ModuleNetworkingClient::onSocketReceivedData(SOCKET socket, byte * data)
+void ModuleNetworkingClient::onSocketReceivedData(SOCKET socket, const InputMemoryStream& packet)
 {
 	state = ClientState::Stopped;
 }

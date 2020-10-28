@@ -23,17 +23,17 @@ void ModuleNetworking::reportError(const char* inOperationDesc)
 	ELOG("Error %s: %d- %s", inOperationDesc, errorNum, lpMsgBuf);
 }
 
-//bool ModuleNetworking::sendPacket(const OutputMemoryStream& packet, SOCKET socket)
-//{
-//	int result = send(socket, packet.GetBufferPtr(), packet.GetSize(), 0);
-//	if (result == SOCKET_ERROR)
-//	{
-//		reportError("send");
-//		return false;
-//	}
-//
-//	return true;
-//}
+bool ModuleNetworking::sendPacket(const OutputMemoryStream& packet, SOCKET socket)
+{
+	int result = send(socket, packet.GetBufferPtr(), packet.GetSize(), 0);
+	if (result == SOCKET_ERROR)
+	{
+		reportError("send");
+		return false;
+	}
+
+	return true;
+}
 
 void ModuleNetworking::disconnect()
 {
@@ -69,8 +69,10 @@ bool ModuleNetworking::preUpdate()
 	if (sockets.empty()) return true;
 
 	// NOTE(jesus): You can use this temporary buffer to store data from recv()
-	const uint32 incomingDataBufferSize = Kilobytes(1);
-	byte incomingDataBuffer[incomingDataBufferSize]{"\0"};
+	//const uint32 incomingDataBufferSize = Kilobytes(1);
+	//byte incomingDataBuffer[incomingDataBufferSize]{"\0"};
+
+	InputMemoryStream packet;
 
 	int available_ops = 0;
 	// TODO(jesus): select those sockets that have a read operation available
@@ -135,7 +137,7 @@ bool ModuleNetworking::preUpdate()
 				// Recv stuff
 				// On recv() success, communicate the incoming data received to the
 				// subclass (use the callback onSocketReceivedData()).
-				int iResult = recv(s, (char*)&incomingDataBuffer, incomingDataBufferSize, 0);
+				int iResult = recv(s, packet.GetBufferPtr(), packet.GetCapacity(), 0);
 
 				if (iResult == SOCKET_ERROR)
 				{
@@ -149,7 +151,8 @@ bool ModuleNetworking::preUpdate()
 					continue;
 				}
 
-				onSocketReceivedData(s, incomingDataBuffer);
+				packet.SetSize((uint32)iResult); // reuse iResult
+				onSocketReceivedData(s, packet);
 			}
 		}
 	}
