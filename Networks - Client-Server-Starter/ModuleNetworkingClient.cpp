@@ -144,14 +144,21 @@ bool ModuleNetworkingClient::gui()
 
 				if (ImGui::InputText("", msg, 1000, ImGuiInputTextFlags_EnterReturnsTrue | ImGuiInputTextFlags_AutoSelectAll))
 				{
-					std::string final_msg = playerName + ": " + msg;
-					OutputMemoryStream packet;
-					packet << ClientMessage::Message;
-					packet << final_msg;
-
-					if (!sendPacket(packet, sk))
+					if (strcmp(msg, "/clear") == 0)
 					{
-						ELOG("Message could not be sent");
+						messages.clear();
+					}
+					else
+					{
+						std::string final_msg = playerName + ": " + msg;
+						OutputMemoryStream packet;
+						packet << ClientMessage::Message;
+						packet << final_msg;
+
+						if (!sendPacket(packet, sk))
+						{
+							ELOG("Message could not be sent");
+						}
 					}
 
 					strcpy_s(msg, 1000, "");
