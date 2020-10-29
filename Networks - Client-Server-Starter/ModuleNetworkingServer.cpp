@@ -167,9 +167,23 @@ bool ModuleNetworkingServer::onSocketReceivedData(SOCKET socket, const InputMemo
 		WelcomePacket << ServerMessage::Welcome;
 		WelcomePacket << "Welcome!!!";
 		sendPacket(WelcomePacket, socket);
-
-		if(connectedSocketRef)
+ 
+		if (connectedSocketRef)
+		{
 			connectedSocketRef->playerName = playerName;
+
+			// --- Notify all users a player joined ---
+			OutputMemoryStream messagePacket;
+			messagePacket << ServerMessage::Message;
+			std::string msg = "|[Server]: " + playerName;
+			msg.append(" joined");
+			messagePacket << msg;
+
+			for (ConnectedSocket& connectedSocket : connectedSockets)
+			{
+				sendPacket(messagePacket, connectedSocket.socket);
+			}
+		}
 	}
 	else if (clientMessage == ClientMessage::Message)
 	{

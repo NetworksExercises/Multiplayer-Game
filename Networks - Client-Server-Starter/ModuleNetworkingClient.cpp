@@ -101,18 +101,22 @@ bool ModuleNetworkingClient::gui()
 					// --- Print logs to console ---
 
 					ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(2, 1)); // Tighten spacing
+					
+					static std::string server_key = "|";
+
+					std::string key;
+					std::string item;
 
 					for (unsigned int i = 0; i < messages.size(); ++i)
 					{
-						std::string item = messages[i];
-						
+						item = messages[i];
+						key = item.substr(0, 1);
+
 						// --- Display error messages in red color ---
-						//if (item[1] == *error_key)
-						//	ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.75, 0, 0, 255));
-						//else if (item[1] == *warning_key)
-						//	ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.75, 0.75, 0, 255));
-						//else
-						ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(255, 255, 255, 255));
+						if (key == server_key)
+							ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.75, 0.75, 0, 255));
+						else
+							ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(255, 255, 255, 255));
 
 						// --- If text does not match the filter don't print it ---
 						if (!filter.PassFilter(item.c_str()))
@@ -138,9 +142,10 @@ bool ModuleNetworkingClient::gui()
 
 				if (ImGui::InputText("", msg, 1000, ImGuiInputTextFlags_EnterReturnsTrue | ImGuiInputTextFlags_AutoSelectAll))
 				{
+					std::string final_msg = playerName + ": " + msg;
 					OutputMemoryStream packet;
 					packet << ClientMessage::Message;
-					packet << msg;
+					packet << final_msg;
 
 					if (!sendPacket(packet, sk))
 					{
