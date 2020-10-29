@@ -144,7 +144,7 @@ bool ModuleNetworkingServer::onSocketReceivedData(SOCKET socket, const InputMemo
 
 		ConnectedSocket* connectedSocketRef = nullptr;
 
-		for (auto& connectedSocket : connectedSockets)
+		for (ConnectedSocket& connectedSocket : connectedSockets)
 		{
 			if (connectedSocket.playerName == playerName)
 			{
@@ -170,6 +170,20 @@ bool ModuleNetworkingServer::onSocketReceivedData(SOCKET socket, const InputMemo
 
 		if(connectedSocketRef)
 			connectedSocketRef->playerName = playerName;
+	}
+	else if (clientMessage == ClientMessage::Message)
+	{
+		// --- If playername does not exist ---
+		OutputMemoryStream messagePacket;
+		messagePacket << ServerMessage::Message;
+		std::string msg;
+		packet >> msg;
+		messagePacket << msg;
+
+		for (ConnectedSocket& connectedSocket : connectedSockets)
+		{
+			sendPacket(messagePacket, connectedSocket.socket);
+		}
 	}
 
 	return true;

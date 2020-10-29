@@ -54,7 +54,10 @@ private:
 	sockaddr_in serverAddress = {};
 	SOCKET sk = INVALID_SOCKET; 	// NOTE: Had to change name of .h var from socket to sk due to overlapping function name
 
+	std::vector<std::string> messages;
 
 	std::string playerName;
+
+	ImGuiTextFilter filter;
 };
 
