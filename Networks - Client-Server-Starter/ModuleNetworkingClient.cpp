@@ -96,6 +96,8 @@ bool ModuleNetworkingClient::gui()
 				scrollFlags |= ImGuiWindowFlags_HorizontalScrollbar;
 				scrollFlags |= ImGuiWindowFlags_AlwaysVerticalScrollbar;
 
+				ImGui::SetKeyboardFocusHere();
+
 				if (ImGui::BeginChild("Chat Body", ImVec2(0, ImGui::GetWindowHeight() * 0.9f), false, scrollFlags))
 				{
 					// --- Print logs to console ---
