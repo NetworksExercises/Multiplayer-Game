@@ -80,17 +80,26 @@ bool ModuleNetworkingClient::gui()
 	return true;
 }
 
-void ModuleNetworkingClient::onSocketReceivedData(SOCKET socket, const InputMemoryStream& packet)
+bool ModuleNetworkingClient::onSocketReceivedData(SOCKET socket, const InputMemoryStream& packet)
 {
 	ServerMessage serverMessage;
 	packet >> serverMessage;
 
+	std::string msg;
+	packet >> msg;
+
 	// Set the player name of the corresponding connected socket proxy
 	if (serverMessage == ServerMessage::Welcome)
 	{
-		std::string msg;
-		packet >> msg;
+
 	}
+	else if (serverMessage == ServerMessage::UnWelcome)
+	{
+		WLOG("ModuleNetworkingClient::onSocketReceivedData() - %s", msg.c_str());
+		state = ClientState::Stopped;
+	}
+
+	return true;
 }
 
 void ModuleNetworkingClient::onSocketDisconnected(SOCKET socket)

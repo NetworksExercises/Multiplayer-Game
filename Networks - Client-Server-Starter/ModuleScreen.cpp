@@ -13,6 +13,11 @@ bool ModuleScreen::init()
 	screenLoading->enabled = true;
 	screenBackground->enabled = true;
 
+	LOG("Example Info log entry...");
+	DLOG("Example Debug log entry...");
+	WLOG("Example Warning log entry...");
+	ELOG("Example Error log entry...");
+
 	return true;
 }
 

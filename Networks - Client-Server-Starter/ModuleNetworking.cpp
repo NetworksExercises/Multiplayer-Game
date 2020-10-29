@@ -127,12 +127,6 @@ bool ModuleNetworking::preUpdate()
 					continue;
 				}
 
-				OutputMemoryStream packet;
-				packet << ServerMessage::Welcome;
-				packet << "Welcome!!!";
-
-				sendPacket(packet, connected_sk);
-
 				onSocketConnected(connected_sk, clientAddr);
 				addSocket(connected_sk);
 			}
@@ -153,12 +147,16 @@ bool ModuleNetworking::preUpdate()
 				}
 				else if (iResult == 0)
 				{
-					disconnectedSockets.push_back(s);;
+					disconnectedSockets.push_back(s);
 					continue;
 				}
 
 				packet.SetSize((uint32)iResult); // reuse iResult
-				onSocketReceivedData(s, packet);
+				bool ret = onSocketReceivedData(s, packet);
+
+				// --- Unwelcome message, disconnecting... ---
+				if(!ret)
+					disconnectedSockets.push_back(s);
 			}
 		}
 	}

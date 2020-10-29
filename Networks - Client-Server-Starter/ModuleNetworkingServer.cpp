@@ -90,6 +90,10 @@ bool ModuleNetworkingServer::gui()
 
 		for (auto &connectedSocket : connectedSockets)
 		{
+			// --- Socket has not yet sent its playername ---
+			if (connectedSocket.playerName.empty())
+				continue;
+			
 			ImGui::Separator();
 			ImGui::Text("Socket ID: %d", connectedSocket.socket);
 			ImGui::Text("Address: %d.%d.%d.%d:%d",
@@ -127,7 +131,7 @@ void ModuleNetworkingServer::onSocketConnected(SOCKET socket, const sockaddr_in 
 	connectedSockets.push_back(connectedSocket);
 }
 
-void ModuleNetworkingServer::onSocketReceivedData(SOCKET socket, const InputMemoryStream& packet)
+bool ModuleNetworkingServer::onSocketReceivedData(SOCKET socket, const InputMemoryStream& packet)
 {
 	ClientMessage clientMessage;
 	packet >> clientMessage;
@@ -138,14 +142,37 @@ void ModuleNetworkingServer::onSocketReceivedData(SOCKET socket, const InputMemo
 		std::string playerName;
 		packet >> playerName;
 
+		ConnectedSocket* connectedSocketRef = nullptr;
+
 		for (auto& connectedSocket : connectedSockets)
 		{
+			if (connectedSocket.playerName == playerName)
+			{
+				// --- If playername does not exist ---
+				OutputMemoryStream UnWelcomePacket;
+				UnWelcomePacket << ServerMessage::UnWelcome;
+				UnWelcomePacket << "Sorry, change your name";
+				sendPacket(UnWelcomePacket, socket);
+				return false;
+			}
+
 			if (connectedSocket.socket == socket)
 			{
-				connectedSocket.playerName = playerName;
+				connectedSocketRef = &connectedSocket;
 			}
 		}
+
+		// --- If playername does not exist, send welcome package and assign name ---
+		OutputMemoryStream WelcomePacket;
+		WelcomePacket << ServerMessage::Welcome;
+		WelcomePacket << "Welcome!!!";
+		sendPacket(WelcomePacket, socket);
+
+		if(connectedSocketRef)
+			connectedSocketRef->playerName = playerName;
 	}
+
+	return true;
 }
 
 void ModuleNetworkingServer::onSocketDisconnected(SOCKET socket)

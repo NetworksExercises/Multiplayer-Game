@@ -25,11 +25,9 @@ private:
 
 	virtual void onSocketConnected(SOCKET socket, const sockaddr_in &socketAddress) { }
 
-	virtual void onSocketReceivedData(SOCKET s, const InputMemoryStream& packet) = 0;
+	virtual bool onSocketReceivedData(SOCKET s, const InputMemoryStream& packet) = 0;
 
 	virtual void onSocketDisconnected(SOCKET s) = 0;
-
-
 
 protected:
 

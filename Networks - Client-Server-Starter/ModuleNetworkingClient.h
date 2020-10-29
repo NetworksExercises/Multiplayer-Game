@@ -32,7 +32,7 @@ private:
 	// ModuleNetworking virtual methods
 	//////////////////////////////////////////////////////////////////////
 
-	void onSocketReceivedData(SOCKET socket, const InputMemoryStream& packet) override;
+	bool onSocketReceivedData(SOCKET socket, const InputMemoryStream& packet) override;
 
 	void onSocketDisconnected(SOCKET socket) override;
 
