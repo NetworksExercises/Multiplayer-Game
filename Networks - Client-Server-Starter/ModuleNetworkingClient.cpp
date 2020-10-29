@@ -148,6 +148,19 @@ bool ModuleNetworkingClient::gui()
 					{
 						messages.clear();
 					}
+					else if (strcmp(msg, "/help") == 0)
+					{
+						
+
+						OutputMemoryStream packet;
+						packet << ClientMessage::Command;
+						packet << msg;
+
+						if (!sendPacket(packet, sk))
+						{
+							ELOG("Message could not be sent");
+						}
+					}
 					else
 					{
 						std::string final_msg = playerName + ": " + msg;

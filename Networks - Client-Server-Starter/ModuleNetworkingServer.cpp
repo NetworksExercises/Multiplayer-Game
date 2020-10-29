@@ -199,6 +199,20 @@ bool ModuleNetworkingServer::onSocketReceivedData(SOCKET socket, const InputMemo
 			sendPacket(messagePacket, connectedSocket.socket);
 		}
 	}
+	else if (clientMessage == ClientMessage::Command)
+	{
+		// --- If playername does not exist ---
+		OutputMemoryStream messagePacket;
+		messagePacket << ServerMessage::Message;
+		std::string msg;
+		packet >> msg;
+		if (strcmp(msg.c_str(), "/help") == 0)
+		{
+			std::string commandList = "Command List : \n /clear -> Clears all messages \n /kick [username] -> Kicks the user from the chat";
+			messagePacket << commandList;
+			sendPacket(messagePacket, socket);
+		}
+	}
 
 	return true;
 }
