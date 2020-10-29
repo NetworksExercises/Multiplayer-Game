@@ -211,7 +211,20 @@ void ModuleNetworkingServer::onSocketDisconnected(SOCKET socket)
 		auto &connectedSocket = *it;
 		if (connectedSocket.socket == socket)
 		{
+			// --- Notify all users a player disconnected ---
+			OutputMemoryStream messagePacket;
+			messagePacket << ServerMessage::Message;
+			std::string msg = "|[Server]: " + connectedSocket.playerName;
+			msg.append(" disconnected");
+			messagePacket << msg;
+
+			for (ConnectedSocket& connectedSocket : connectedSockets)
+			{
+				sendPacket(messagePacket, connectedSocket.socket);
+			}
+
 			connectedSockets.erase(it);
+
 			break;
 		}
 	}
