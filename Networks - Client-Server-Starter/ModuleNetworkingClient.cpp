@@ -82,7 +82,15 @@ bool ModuleNetworkingClient::gui()
 
 void ModuleNetworkingClient::onSocketReceivedData(SOCKET socket, const InputMemoryStream& packet)
 {
-	state = ClientState::Stopped;
+	ServerMessage serverMessage;
+	packet >> serverMessage;
+
+	// Set the player name of the corresponding connected socket proxy
+	if (serverMessage == ServerMessage::Welcome)
+	{
+		std::string msg;
+		packet >> msg;
+	}
 }
 
 void ModuleNetworkingClient::onSocketDisconnected(SOCKET socket)

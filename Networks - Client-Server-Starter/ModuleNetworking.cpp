@@ -127,6 +127,12 @@ bool ModuleNetworking::preUpdate()
 					continue;
 				}
 
+				OutputMemoryStream packet;
+				packet << ServerMessage::Welcome;
+				packet << "Welcome!!!";
+
+				sendPacket(packet, connected_sk);
+
 				onSocketConnected(connected_sk, clientAddr);
 				addSocket(connected_sk);
 			}
