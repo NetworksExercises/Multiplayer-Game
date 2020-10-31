@@ -203,14 +203,27 @@ bool ModuleNetworkingServer::onSocketReceivedData(SOCKET socket, const InputMemo
 	{
 		// --- If playername does not exist ---
 		OutputMemoryStream messagePacket;
-		messagePacket << ServerMessage::Message;
+		messagePacket << ServerMessage::Command;
 		std::string msg;
 		packet >> msg;
+
 		if (strcmp(msg.c_str(), "/help") == 0)
 		{
 			std::string commandList = "Command List : \n /clear -> Clears all messages \n /kick [username] -> Kicks the user from the chat";
 			messagePacket << commandList;
 			sendPacket(messagePacket, socket);
+		}
+		else if (msg.find("/kick") != std::string::npos)
+		{
+			std::string player_to_kick = msg.substr(5, std::string::npos);
+
+			for (ConnectedSocket& connectedSocket : connectedSockets)
+			{
+				if (player_to_kick == connectedSocket.playerName)
+				{
+					sendPacket(messagePacket, socket);
+				}
+			}
 		}
 	}
 

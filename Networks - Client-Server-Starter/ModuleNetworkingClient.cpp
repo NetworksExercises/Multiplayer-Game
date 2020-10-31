@@ -1,4 +1,6 @@
 #include "ModuleNetworkingClient.h"
+#include <stdio.h>
+#include <stdlib.h>
 
 
 bool  ModuleNetworkingClient::start(const char * serverAddressStr, int serverPort, const char *pplayerName)
@@ -142,16 +144,30 @@ bool ModuleNetworkingClient::gui()
 
 				static char msg[1000];
 
-				if (ImGui::InputText("", msg, 1000, ImGuiInputTextFlags_EnterReturnsTrue | ImGuiInputTextFlags_AutoSelectAll))
+				if (ImGui::InputText("", msg, IM_ARRAYSIZE(msg), ImGuiInputTextFlags_EnterReturnsTrue | ImGuiInputTextFlags_AutoSelectAll))
 				{
+					char* s = nullptr;
+					strcpy_s(s, sizeof(s), msg);
+
+					std::string input_to_string = s;
+
 					if (strcmp(msg, "/clear") == 0)
 					{
 						messages.clear();
 					}
 					else if (strcmp(msg, "/help") == 0)
 					{
-						
+						OutputMemoryStream packet;
+						packet << ClientMessage::Command;
+						packet << msg;
 
+						if (!sendPacket(packet, sk))
+						{
+							ELOG("Message could not be sent");
+						}
+					}
+					else if (input_to_string.find("/kick") != std::string::npos)
+					{
 						OutputMemoryStream packet;
 						packet << ClientMessage::Command;
 						packet << msg;
@@ -204,6 +220,14 @@ bool ModuleNetworkingClient::onSocketReceivedData(SOCKET socket, const InputMemo
 	{
 		WLOG("ModuleNetworkingClient::onSocketReceivedData() - %s", msg.c_str());
 		return false;
+	}
+	else if (serverMessage == ServerMessage::Command)
+	{
+		if (msg.find("/kick") != std::string::npos)
+		{
+			WLOG("ModuleNetworkingClient::onSocketReceivedData() - You have been kicked from the server: %s", msg.c_str());
+			return false;
+		}
 	}
 	// --- Another client has sent a message ---
 	//else if (serverMessage == ServerMessage::Message)

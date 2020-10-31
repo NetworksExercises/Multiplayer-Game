@@ -14,7 +14,8 @@ enum class ServerMessage
 {
 	Welcome,
 	UnWelcome,
-	Message
+	Message,
+	Command
 };
 
 
