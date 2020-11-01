@@ -146,15 +146,12 @@ bool ModuleNetworkingClient::gui()
 
 				if (ImGui::InputText("", msg, IM_ARRAYSIZE(msg), ImGuiInputTextFlags_EnterReturnsTrue | ImGuiInputTextFlags_AutoSelectAll))
 				{
-					char* s = nullptr;
+					/*char* s = nullptr;
 					strcpy_s(s, sizeof(s), msg);
 
 					std::string input_to_string = s;
 
-					if (strcmp(msg, "/clear") == 0)
-					{
-						messages.clear();
-					}
+					
 					else if (strcmp(msg, "/help") == 0)
 					{
 						OutputMemoryStream packet;
@@ -178,6 +175,13 @@ bool ModuleNetworkingClient::gui()
 						}
 					}
 					else
+					{*/
+
+					if (strcmp(msg, "/clear") == 0)
+					{
+						messages.clear();
+					}
+					else
 					{
 						std::string final_msg = playerName + ": " + msg;
 						OutputMemoryStream packet;
@@ -189,6 +193,9 @@ bool ModuleNetworkingClient::gui()
 							ELOG("Message could not be sent");
 						}
 					}
+
+					
+					//}
 
 					strcpy_s(msg, 1000, "");
 				}
@@ -221,19 +228,21 @@ bool ModuleNetworkingClient::onSocketReceivedData(SOCKET socket, const InputMemo
 		WLOG("ModuleNetworkingClient::onSocketReceivedData() - %s", msg.c_str());
 		return false;
 	}
-	else if (serverMessage == ServerMessage::Command)
+	else if (serverMessage == ServerMessage::Kick)
 	{
-		if (msg.find("/kick") != std::string::npos)
-		{
-			WLOG("ModuleNetworkingClient::onSocketReceivedData() - You have been kicked from the server: %s", msg.c_str());
-			return false;
-		}
+		WLOG("Kicked by", msg.c_str());
+		return false;
 	}
+	/*else if ()
+	{
+		messages.push_back(msg);
+	}*/
+	//}
 	// --- Another client has sent a message ---
 	//else if (serverMessage == ServerMessage::Message)
 	//{
 	//	messages.push_back(msg);
-	//}
+	
 
 	return true;
 }

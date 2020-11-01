@@ -189,25 +189,12 @@ bool ModuleNetworkingServer::onSocketReceivedData(SOCKET socket, const InputMemo
 	{
 		// --- If playername does not exist ---
 		OutputMemoryStream messagePacket;
-		messagePacket << ServerMessage::Message;
+		
 		std::string msg;
 		packet >> msg;
-		messagePacket << msg;
+		
 
-		for (ConnectedSocket& connectedSocket : connectedSockets)
-		{
-			sendPacket(messagePacket, connectedSocket.socket);
-		}
-	}
-	else if (clientMessage == ClientMessage::Command)
-	{
-		// --- If playername does not exist ---
-		OutputMemoryStream messagePacket;
-		messagePacket << ServerMessage::Command;
-		std::string msg;
-		packet >> msg;
-
-		if (strcmp(msg.c_str(), "/help") == 0)
+		if (msg.find("/help") != std::string::npos)
 		{
 			std::string commandList = "Command List : \n /clear -> Clears all messages \n /kick [username] -> Kicks the user from the chat";
 			messagePacket << commandList;
@@ -215,17 +202,54 @@ bool ModuleNetworkingServer::onSocketReceivedData(SOCKET socket, const InputMemo
 		}
 		else if (msg.find("/kick") != std::string::npos)
 		{
-			std::string player_to_kick = msg.substr(5, std::string::npos);
+
+			msg.shrink_to_fit();
+
+			//Usermame to be kicked is found by getting a substring without the sender name and /kick 
+			std::string kick;
+			kick = "/kick";
+			int kickSize = strlen(kick.c_str());
+
+			int senderIndex = msg.find(kick);
+			std::string senderName = msg.substr(0, senderIndex - 1);
+
+			messagePacket << ServerMessage::Kick;
+			messagePacket << senderName;
+			
 
 			for (ConnectedSocket& connectedSocket : connectedSockets)
 			{
+				std::string player_to_kick = msg.substr(senderIndex + kickSize + 1, std::string::npos);
+
 				if (player_to_kick == connectedSocket.playerName)
 				{
-					sendPacket(messagePacket, socket);
+					
+					sendPacket(messagePacket, connectedSocket.socket);
 				}
 			}
 		}
+		else
+		{
+			messagePacket << ServerMessage::Message;
+			messagePacket << msg;
+
+			for (ConnectedSocket& connectedSocket : connectedSockets)
+			{
+				sendPacket(messagePacket, connectedSocket.socket);
+			}
+		}
+		
 	}
+	//else if (clientMessage == ClientMessage::Command)
+	//{
+	//	// --- If playername does not exist ---
+	//	OutputMemoryStream messagePacket;
+	//	messagePacket << ServerMessage::Command;
+	//	std::string msg;
+	//	packet >> msg;
+
+	//	
+	//}
 
 	return true;
 }
