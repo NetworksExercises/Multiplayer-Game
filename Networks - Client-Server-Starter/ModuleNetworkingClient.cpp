@@ -230,7 +230,7 @@ bool ModuleNetworkingClient::onSocketReceivedData(SOCKET socket, const InputMemo
 	}
 	else if (serverMessage == ServerMessage::Kick)
 	{
-		WLOG("Kicked by", msg.c_str());
+		WLOG("Kicked by: %s", msg.c_str());
 		return false;
 	}
 	/*else if ()

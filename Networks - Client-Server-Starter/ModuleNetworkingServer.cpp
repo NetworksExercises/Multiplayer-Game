@@ -213,7 +213,7 @@ bool ModuleNetworkingServer::onSocketReceivedData(SOCKET socket, const InputMemo
 			int kickSize = strlen(kick.c_str());
 
 			int senderIndex = msg.find(kick);
-			std::string senderName = msg.substr(0, senderIndex - 1);
+			std::string senderName = msg.substr(0, senderIndex - 2);
 
 			messagePacket << ServerMessage::Kick;
 			messagePacket << senderName;
@@ -221,12 +221,17 @@ bool ModuleNetworkingServer::onSocketReceivedData(SOCKET socket, const InputMemo
 
 			for (ConnectedSocket& connectedSocket : connectedSockets)
 			{
+				/*if (msg.length() > (senderIndex + kickSize))
+				{
+
+				}*/
+
 				std::string player_to_kick = msg.substr(senderIndex + kickSize + 1, std::string::npos);
 
 				if (player_to_kick == connectedSocket.playerName)
 				{
-					
 					sendPacket(messagePacket, connectedSocket.socket);
+					onSocketDisconnected(connectedSocket.socket);
 				}
 			}
 		}
