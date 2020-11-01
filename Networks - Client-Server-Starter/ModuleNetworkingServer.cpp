@@ -196,6 +196,8 @@ bool ModuleNetworkingServer::onSocketReceivedData(SOCKET socket, const InputMemo
 
 		if (msg.find("/help") != std::string::npos)
 		{
+			messagePacket << ServerMessage::Message;
+
 			std::string commandList = "Command List : \n /clear -> Clears all messages \n /kick [username] -> Kicks the user from the chat";
 			messagePacket << commandList;
 			sendPacket(messagePacket, socket);
