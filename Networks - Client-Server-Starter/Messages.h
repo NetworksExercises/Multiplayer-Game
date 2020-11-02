@@ -15,7 +15,8 @@ enum class ServerMessage
 	Welcome,
 	UnWelcome,
 	Message,
-	Kick
+	Kick,
+	ChangeName
 
 };
 

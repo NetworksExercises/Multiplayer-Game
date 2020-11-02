@@ -204,7 +204,6 @@ bool ModuleNetworkingServer::onSocketReceivedData(SOCKET socket, const InputMemo
 		}
 		else if (msg.find("/kick") != std::string::npos)
 		{
-
 			msg.shrink_to_fit();
 
 			//Usermame to be kicked is found by getting a substring without the sender name and /kick 
@@ -218,20 +217,56 @@ bool ModuleNetworkingServer::onSocketReceivedData(SOCKET socket, const InputMemo
 			messagePacket << ServerMessage::Kick;
 			messagePacket << senderName;
 			
-
 			for (ConnectedSocket& connectedSocket : connectedSockets)
 			{
 				std::string player_to_kick;
 
-				if (msg.size() > (senderIndex + kickSize + 1))
+				if (msg.length() > (senderIndex + kickSize + 1))
 				{
 					player_to_kick = msg.substr(senderIndex + kickSize + 1, std::string::npos);
-				}
 
-				if (player_to_kick == connectedSocket.playerName)
+					if (player_to_kick == connectedSocket.playerName)
+					{
+						sendPacket(messagePacket, connectedSocket.socket);
+						onSocketDisconnected(connectedSocket.socket);
+					}
+				}
+			}
+		}
+		else if (msg.find("/change_name") != std::string::npos)
+		{
+			msg.shrink_to_fit();
+
+			//Usermame to be changed is found by getting a substring without the sender name and /kick 
+			std::string change_name;
+			change_name = "/change_name";
+			int changeSize = strlen(change_name.c_str());
+
+			int senderIndex = msg.find(change_name);
+			std::string senderName = msg.substr(0, senderIndex - 2);
+
+			messagePacket << ServerMessage::ChangeName;
+			
+			for (ConnectedSocket& connectedSocket : connectedSockets)
+			{
+				std::string name_to_change;
+
+				if (msg.length() > (senderIndex + changeSize + 1))
 				{
-					sendPacket(messagePacket, connectedSocket.socket);
-					onSocketDisconnected(connectedSocket.socket);
+					name_to_change = msg.substr(senderIndex + changeSize + 1, std::string::npos);
+
+					if (senderName == connectedSocket.playerName)
+					{
+						connectedSocket.playerName = name_to_change;
+
+						std::string notice = (" has changed his name to: ");
+						senderName.append(notice);
+						senderName.append(name_to_change);
+						messagePacket << senderName;
+
+						sendPacket(messagePacket, socket);
+						break;
+					}
 				}
 			}
 		}
