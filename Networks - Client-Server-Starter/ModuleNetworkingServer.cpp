@@ -221,12 +221,12 @@ bool ModuleNetworkingServer::onSocketReceivedData(SOCKET socket, const InputMemo
 
 			for (ConnectedSocket& connectedSocket : connectedSockets)
 			{
-				/*if (msg.length() > (senderIndex + kickSize))
+				std::string player_to_kick;
+
+				if (msg.size() > (senderIndex + kickSize + 1))
 				{
-
-				}*/
-
-				std::string player_to_kick = msg.substr(senderIndex + kickSize + 1, std::string::npos);
+					player_to_kick = msg.substr(senderIndex + kickSize + 1, std::string::npos);
+				}
 
 				if (player_to_kick == connectedSocket.playerName)
 				{
