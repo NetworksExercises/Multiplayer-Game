@@ -142,6 +142,22 @@ bool ModuleNetworkingServer::onSocketReceivedData(SOCKET socket, const InputMemo
 		std::string playerName;
 		packet >> playerName;
 
+		// --- Check if the player name is in the banned list ---
+
+		for (std::string pName : banned_players)
+		{
+			if (pName == playerName)
+			{
+				// --- If playername is banned, stop connection ---
+				OutputMemoryStream UnWelcomePacket;
+				UnWelcomePacket << ServerMessage::UnWelcome;
+				UnWelcomePacket << "Sorry, this player is banned";
+				sendPacket(UnWelcomePacket, socket);
+				return false;
+			}
+		}
+
+
 		ConnectedSocket* connectedSocketRef = nullptr;
 
 		for (ConnectedSocket& connectedSocket : connectedSockets)
@@ -151,7 +167,7 @@ bool ModuleNetworkingServer::onSocketReceivedData(SOCKET socket, const InputMemo
 				// --- If playername does not exist ---
 				OutputMemoryStream UnWelcomePacket;
 				UnWelcomePacket << ServerMessage::UnWelcome;
-				UnWelcomePacket << "Sorry, change your name";
+				UnWelcomePacket << "Sorry, this user is already connected change your name";
 				sendPacket(UnWelcomePacket, socket);
 				return false;
 			}
@@ -229,6 +245,7 @@ bool ModuleNetworkingServer::onSocketReceivedData(SOCKET socket, const InputMemo
 					{
 						sendPacket(messagePacket, connectedSocket.socket);
 						onSocketDisconnected(connectedSocket.socket);
+						break;
 					}
 				}
 			}
@@ -270,6 +287,42 @@ bool ModuleNetworkingServer::onSocketReceivedData(SOCKET socket, const InputMemo
 				}
 			}
 		}
+		else if (msg.find("/ban") != std::string::npos)
+		{
+			msg.shrink_to_fit();
+
+			//Usermame to be changed is found by getting a substring without the sender name and /kick 
+			std::string ban;
+			ban = "/ban";
+			int changeSize = strlen(ban.c_str());
+
+			int senderIndex = msg.find(ban);
+			std::string senderName = msg.substr(0, senderIndex - 2);
+
+			messagePacket << ServerMessage::Ban;
+
+			for (ConnectedSocket& connectedSocket : connectedSockets)
+			{
+				std::string name_to_ban;
+
+				if (msg.length() > (senderIndex + changeSize + 1))
+				{
+					name_to_ban = msg.substr(senderIndex + changeSize + 1, std::string::npos);
+
+					if (name_to_ban == connectedSocket.playerName)
+					{
+						messagePacket << senderName;
+
+						banned_players.push_back(name_to_ban);
+
+						sendPacket(messagePacket, connectedSocket.socket);
+
+						onSocketDisconnected(connectedSocket.socket);
+						break;
+					}
+				}
+			}
+		}
 		else
 		{
 			messagePacket << ServerMessage::Message;
@@ -302,7 +355,7 @@ void ModuleNetworkingServer::onSocketDisconnected(SOCKET socket)
 	for (auto it = connectedSockets.begin(); it != connectedSockets.end(); ++it)
 	{
 		auto &connectedSocket = *it;
-		if (connectedSocket.socket == socket)
+		if (connectedSocket.socket == socket && !connectedSocket.playerName.empty())
 		{
 			// --- Notify all users a player disconnected ---
 			OutputMemoryStream messagePacket;

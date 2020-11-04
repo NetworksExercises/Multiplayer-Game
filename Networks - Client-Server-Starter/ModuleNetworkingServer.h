@@ -66,5 +66,6 @@ private:
 	};
 
 	std::vector<ConnectedSocket> connectedSockets;
+	std::vector<std::string> banned_players;
 };
 

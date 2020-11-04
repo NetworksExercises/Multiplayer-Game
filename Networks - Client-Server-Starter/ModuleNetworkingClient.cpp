@@ -210,6 +210,11 @@ bool ModuleNetworkingClient::onSocketReceivedData(SOCKET socket, const InputMemo
 			
 		messages.push_back(msg);
 	}
+	else if (serverMessage == ServerMessage::Ban)
+	{
+		WLOG("Banned by: %s", msg.c_str());
+		return false;
+	}
 	/*else if ()
 	{
 		messages.push_back(msg);
