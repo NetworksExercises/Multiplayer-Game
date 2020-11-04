@@ -1,4 +1,5 @@
 #include "ModuleNetworkingServer.h"
+#include <string>
 
 
 
@@ -102,7 +103,12 @@ bool ModuleNetworkingServer::gui()
 				connectedSocket.address.sin_addr.S_un.S_un_b.s_b3,
 				connectedSocket.address.sin_addr.S_un.S_un_b.s_b4,
 				ntohs(connectedSocket.address.sin_port));
+
+			ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(connectedSocket.color.r / 255, connectedSocket.color.g / 255, connectedSocket.color.b / 255, 255));
+
 			ImGui::Text("Player name: %s", connectedSocket.playerName.c_str());
+
+			ImGui::PopStyleColor();
 		}
 
 		ImGui::End();
@@ -140,8 +146,9 @@ bool ModuleNetworkingServer::onSocketReceivedData(SOCKET socket, const InputMemo
 	if (clientMessage == ClientMessage::Hello)
 	{
 		std::string playerName;
+		Color col;
 		packet >> playerName;
-
+		packet >> col;
 		// --- Check if the player name is in the banned list ---
 
 		for (std::string pName : banned_players)
@@ -152,6 +159,7 @@ bool ModuleNetworkingServer::onSocketReceivedData(SOCKET socket, const InputMemo
 				OutputMemoryStream UnWelcomePacket;
 				UnWelcomePacket << ServerMessage::UnWelcome;
 				UnWelcomePacket << "Sorry, this player is banned";
+				UnWelcomePacket << Color(0, 255, 0);
 				sendPacket(UnWelcomePacket, socket);
 				return false;
 			}
@@ -168,6 +176,7 @@ bool ModuleNetworkingServer::onSocketReceivedData(SOCKET socket, const InputMemo
 				OutputMemoryStream UnWelcomePacket;
 				UnWelcomePacket << ServerMessage::UnWelcome;
 				UnWelcomePacket << "Sorry, this user is already connected change your name";
+				UnWelcomePacket << Color(0, 255, 0);
 				sendPacket(UnWelcomePacket, socket);
 				return false;
 			}
@@ -182,6 +191,7 @@ bool ModuleNetworkingServer::onSocketReceivedData(SOCKET socket, const InputMemo
 		OutputMemoryStream WelcomePacket;
 		WelcomePacket << ServerMessage::Welcome;
 		WelcomePacket << "Welcome!!!";
+		WelcomePacket << col;
 		sendPacket(WelcomePacket, socket);
  
 		if (connectedSocketRef)
@@ -194,6 +204,7 @@ bool ModuleNetworkingServer::onSocketReceivedData(SOCKET socket, const InputMemo
 			std::string msg = "|[Server]: " + playerName;
 			msg.append(" joined");
 			messagePacket << msg;
+			messagePacket << Color(0, 255, 0);
 
 			for (ConnectedSocket& connectedSocket : connectedSockets)
 			{
@@ -207,8 +218,9 @@ bool ModuleNetworkingServer::onSocketReceivedData(SOCKET socket, const InputMemo
 		OutputMemoryStream messagePacket;
 		
 		std::string msg;
+		Color color;
 		packet >> msg;
-		
+		packet >> color;
 
 		if (msg.find("/help") != std::string::npos)
 		{
@@ -216,6 +228,7 @@ bool ModuleNetworkingServer::onSocketReceivedData(SOCKET socket, const InputMemo
 
 			std::string commandList = "Command List : \n /clear -> Clears all messages \n /kick [username] -> Kicks the user from the chat";
 			messagePacket << commandList;
+			messagePacket << color;
 			sendPacket(messagePacket, socket);
 		}
 		else if (msg.find("/kick") != std::string::npos)
@@ -232,7 +245,8 @@ bool ModuleNetworkingServer::onSocketReceivedData(SOCKET socket, const InputMemo
 
 			messagePacket << ServerMessage::Kick;
 			messagePacket << senderName;
-			
+			messagePacket << color;
+
 			for (ConnectedSocket& connectedSocket : connectedSockets)
 			{
 				std::string player_to_kick;
@@ -280,6 +294,7 @@ bool ModuleNetworkingServer::onSocketReceivedData(SOCKET socket, const InputMemo
 						senderName.append(notice);
 						senderName.append(name_to_change);
 						messagePacket << senderName;
+						messagePacket << color;
 
 						sendPacket(messagePacket, socket);
 						break;
@@ -312,6 +327,7 @@ bool ModuleNetworkingServer::onSocketReceivedData(SOCKET socket, const InputMemo
 					if (name_to_ban == connectedSocket.playerName)
 					{
 						messagePacket << senderName;
+						messagePacket << color;
 
 						banned_players.push_back(name_to_ban);
 
@@ -323,10 +339,110 @@ bool ModuleNetworkingServer::onSocketReceivedData(SOCKET socket, const InputMemo
 				}
 			}
 		}
+		else if (msg.find("/change_color") != std::string::npos)
+		{
+			// --- Syntax: /change_color 255,255,255 ---
+
+			msg.shrink_to_fit();
+
+			//Usermame to be changed is found by getting a substring without the sender name and /kick 
+			std::string col;
+			col = "/change_color";
+			int changeSize = strlen(col.c_str());
+
+			int senderIndex = msg.find(col);
+			std::string senderName = msg.substr(0, senderIndex - 2);
+
+			Color new_color;
+
+			int color_index = senderIndex + changeSize;
+
+			std::string color_msg = msg.substr(color_index + 1, std::string::npos);
+
+
+			int coma_index = color_msg.find("/");
+			std::string color_value;
+
+			if (coma_index != std::string::npos)
+			{
+				// --- Find red value ---
+				color_value = color_msg.substr(0, coma_index);
+
+				try
+				{
+					new_color.r = std::stoi(color_value);
+				}
+				catch (std::invalid_argument)
+				{
+					LOG("Couldn't read color from: %s", senderName.c_str());
+					return true;
+				}
+
+				color_msg = color_msg.substr(coma_index + 1, std::string::npos);
+
+				// --- Find green value ---
+				coma_index = color_msg.find("/");
+
+				if (coma_index != std::string::npos)
+				{
+					color_value = color_msg.substr(0, coma_index);
+
+					try
+					{
+						new_color.g = std::stoi(color_value);
+					}
+					catch (std::invalid_argument)
+					{
+						LOG("Couldn't read color from: %s", senderName.c_str());
+						return true;
+					}
+				}
+
+				// --- Find blue value;
+
+				//color_msg = color_msg.substr(coma_index + 1, std::string::npos);
+				coma_index = color_msg.find("/");
+
+				if (coma_index != std::string::npos)
+				{
+					color_value = color_msg.substr(coma_index + 1, std::string::npos);
+
+					try
+					{
+						new_color.b = std::stoi(color_value);
+					}
+					catch (std::invalid_argument)
+					{
+						LOG("Couldn't read color from: %s", senderName.c_str());
+						return true;
+					}
+				}
+
+				std::string new_message = senderName;
+				new_message.append(" changed color.");
+
+				messagePacket << ServerMessage::ChangeColor;
+				messagePacket << new_message;
+				messagePacket << new_color;
+
+				for (ConnectedSocket& connectedSocket : connectedSockets)
+				{
+					if (connectedSocket.socket == socket)
+						connectedSocket.color = new_color;
+
+					sendPacket(messagePacket, connectedSocket.socket);
+				}
+
+
+				//sendPacket(messagePacket, socket);		
+			}
+
+		}
 		else
 		{
 			messagePacket << ServerMessage::Message;
 			messagePacket << msg;
+			messagePacket << color;
 
 			for (ConnectedSocket& connectedSocket : connectedSockets)
 			{
@@ -363,6 +479,7 @@ void ModuleNetworkingServer::onSocketDisconnected(SOCKET socket)
 			std::string msg = "|[Server]: " + connectedSocket.playerName;
 			msg.append(" disconnected");
 			messagePacket << msg;
+			messagePacket << Color(0,255,0);
 
 			for (ConnectedSocket& connectedSocket : connectedSockets)
 			{

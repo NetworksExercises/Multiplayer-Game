@@ -49,12 +49,29 @@ private:
 		Logging
 	};
 
+
+
+	struct Message
+	{
+		Message(std::string message, Color color)
+		{
+			this->message = message;
+			this->color = color;
+		}
+
+		std::string message;
+		Color color;
+	};
+
+	Color myColor = Color(255, 255, 255);
+
 	ClientState state = ClientState::Stopped;
 
 	sockaddr_in serverAddress = {};
 	SOCKET sk = INVALID_SOCKET; 	// NOTE: Had to change name of .h var from socket to sk due to overlapping function name
 
-	std::vector<std::string> messages;
+
+	std::vector<Message> messages;
 
 	std::string playerName;
 

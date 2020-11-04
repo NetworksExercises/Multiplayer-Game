@@ -17,8 +17,24 @@ enum class ServerMessage
 	Message,
 	Kick,
 	ChangeName,
-	Ban
+	Ban,
+	ChangeColor
+};
 
+struct Color
+{
+	Color() {};
+
+	Color(unsigned int r, unsigned int g, unsigned int b)
+	{
+		this->r = r;
+		this->g = g;
+		this->b = b;
+	}
+
+	unsigned int r = 255;
+	unsigned int g = 255;
+	unsigned int b = 255;
 };
 
 

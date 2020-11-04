@@ -31,6 +31,8 @@ private:
 
 protected:
 
+
+
 	std::vector<SOCKET> sockets;
 
 	void addSocket(SOCKET socket);

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "ByteSwap.h"
+#include "Messages.h"
 
 enum class Endianness {
 	LittleEndian,
@@ -103,6 +104,14 @@ public:
 		return *this;
 	}
 
+	// Write for colors
+	void Write(const Color& color)
+	{
+		Write(color.r);
+		Write(color.g);
+		Write(color.b);
+	}
+
 
 private:
 
@@ -194,6 +203,13 @@ public:
 		for (uint32 i = 0; i < elementCount; ++i) {
 			Read(inString[i]);
 		}
+	}
+	// Read for colors
+	void Read(Color& color) const
+	{
+		Read(color.r);
+		Read(color.g);
+		Read(color.b);
 	}
 
 	// Generic operator >>

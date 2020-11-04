@@ -50,6 +50,7 @@ bool ModuleNetworkingClient::update()
 		OutputMemoryStream packet;
 		packet << ClientMessage::Hello;
 		packet << playerName;
+		packet << myColor;
 
 		if (sendPacket(packet, sk))
 			state = ClientState::Logging;
@@ -106,21 +107,21 @@ bool ModuleNetworkingClient::gui()
 
 					ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(2, 1)); // Tighten spacing
 					
-					static std::string server_key = "|";
+					//static std::string server_key = "|";
 
 					std::string key;
 					std::string item;
 
 					for (unsigned int i = 0; i < messages.size(); ++i)
 					{
-						item = messages[i];
+						item = messages[i].message;
 						key = item.substr(0, 1);
 
 						// --- Display error messages in red color ---
-						if (key == server_key)
-							ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.75, 0.75, 0, 255));
-						else
-							ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(255, 255, 255, 255));
+						//if (key == server_key)
+						//	ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.75, 0.75, 0, 255));
+						//else
+						ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(messages[i].color.r/255, messages[i].color.g/255, messages[i].color.b/255, 255));
 
 						// --- If text does not match the filter don't print it ---
 						if (!filter.PassFilter(item.c_str()))
@@ -156,6 +157,7 @@ bool ModuleNetworkingClient::gui()
 						OutputMemoryStream packet;
 						packet << ClientMessage::Message;
 						packet << final_msg;
+						packet << myColor;
 
 						if (!sendPacket(packet, sk))
 						{
@@ -182,11 +184,13 @@ bool ModuleNetworkingClient::onSocketReceivedData(SOCKET socket, const InputMemo
 	packet >> serverMessage;
 
 	std::string msg;
+	Color color;
 	packet >> msg;
+	packet >> color;
 
 	if (serverMessage == ServerMessage::Welcome || serverMessage == ServerMessage::Message)
 	{
-		messages.push_back(msg);
+		messages.push_back(Message(msg, color));
 	}
 	// --- Server disconnects client since the playername is already picked ---
 	else if (serverMessage == ServerMessage::UnWelcome)
@@ -208,12 +212,20 @@ bool ModuleNetworkingClient::onSocketReceivedData(SOCKET socket, const InputMemo
 			playerName = senderName;
 		}
 			
-		messages.push_back(msg);
+		messages.push_back(Message(msg, color));
 	}
 	else if (serverMessage == ServerMessage::Ban)
 	{
 		WLOG("Banned by: %s", msg.c_str());
 		return false;
+	}
+	else if (serverMessage == ServerMessage::ChangeColor)
+	{
+
+		messages.push_back(Message(msg, color));
+
+		if (msg.find(playerName) != std::string::npos)
+			myColor = color;
 	}
 	/*else if ()
 	{
