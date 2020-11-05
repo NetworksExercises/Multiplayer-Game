@@ -438,6 +438,23 @@ bool ModuleNetworkingServer::onSocketReceivedData(SOCKET socket, const InputMemo
 			}
 
 		}
+		else if (msg.find("/list") != std::string::npos)
+		{
+			std::string tmp;
+			tmp = "The connected players are: \n";
+
+			messagePacket << ServerMessage::Message;
+			
+			for (ConnectedSocket& connectedSocket : connectedSockets)
+			{
+				std::string connectedPlayer = connectedSocket.playerName + "\n";
+				tmp.append(connectedPlayer);
+			}
+
+			messagePacket << tmp;
+			messagePacket << color;
+			sendPacket(messagePacket, socket);
+		}
 		else
 		{
 			messagePacket << ServerMessage::Message;
