@@ -447,13 +447,100 @@ bool ModuleNetworkingServer::onSocketReceivedData(SOCKET socket, const InputMemo
 			
 			for (ConnectedSocket& connectedSocket : connectedSockets)
 			{
-				std::string connectedPlayer = connectedSocket.playerName + "\n";
+				std::string connectedPlayer = "- " + connectedSocket.playerName + "\n";
 				tmp.append(connectedPlayer);
 			}
 
 			messagePacket << tmp;
 			messagePacket << color;
 			sendPacket(messagePacket, socket);
+		}
+		else if (msg.find("/whisper") != std::string::npos)
+		{
+			msg.shrink_to_fit();
+
+			//Usermame to be kicked is found by getting a substring without the sender name and /kick 
+			std::string whisper;
+			whisper = "/whisper";
+			int whisperSize = strlen(whisper.c_str());
+
+			int senderIndex = msg.find(whisper);
+			std::string senderName = msg.substr(0, senderIndex - 2);
+
+			//Message without the sender's name and :
+			std::string tmp;
+			tmp = msg.substr(senderIndex, std::string::npos);
+
+			int messageMarker = tmp.find(":");
+
+			//Failsave so that the sender knows
+			if (messageMarker == std::string::npos)
+			{
+				std::string tmp;
+				tmp = "Whisper syntax -> /whisper [username]: [message]";
+				messagePacket << ServerMessage::Message;
+				messagePacket << tmp;
+				messagePacket << color;
+
+				sendPacket(messagePacket, socket);
+				return true;
+			}
+
+			int playerNameLength = (messageMarker) - (whisperSize) - 1;
+			std::string message;
+
+			if (tmp.length() - 1 > (whisperSize + playerNameLength + 1))
+			{
+				message = tmp.substr(messageMarker + 2, std::string::npos);
+			}
+			else
+			{
+				std::string tmp;
+				tmp = "Add a message to your whisper please";
+				messagePacket << ServerMessage::Message;
+				messagePacket << tmp;
+				messagePacket << color;
+
+				sendPacket(messagePacket, socket);
+				return true;
+			}
+
+			for (ConnectedSocket& connectedSocket : connectedSockets)
+			{
+				std::string player_to_send;
+				std::string actual_message;
+				
+				player_to_send = tmp.substr(whisperSize + 1, playerNameLength);
+		
+				if (player_to_send == connectedSocket.playerName)
+				{
+					/*std::string auxStr;
+					auxStr = "You sent you a whisper to ";*/
+					senderName.append(" has sent a whisper to ");
+					senderName.append(player_to_send + ": ");
+					senderName.append(message);
+
+					messagePacket << ServerMessage::Message;
+					messagePacket << senderName;
+					messagePacket << Color(255, 0, 255);
+
+					//Sends a packet for both sender and receiver
+					sendPacket(messagePacket, connectedSocket.socket);
+					sendPacket(messagePacket, socket);
+
+					/*OutputMemoryStream tmpPacket;
+
+					auxStr.append(player_to_send);
+					auxStr.append(" " + message);
+
+					tmpPacket << ServerMessage::Message;
+					tmpPacket << senderName;
+					tmpPacket << Color(255, 0, 255);
+
+					tmpPacket << auxStr;*/
+					break;
+				}
+			}
 		}
 		else
 		{
@@ -468,16 +555,6 @@ bool ModuleNetworkingServer::onSocketReceivedData(SOCKET socket, const InputMemo
 		}
 		
 	}
-	//else if (clientMessage == ClientMessage::Command)
-	//{
-	//	// --- If playername does not exist ---
-	//	OutputMemoryStream messagePacket;
-	//	messagePacket << ServerMessage::Command;
-	//	std::string msg;
-	//	packet >> msg;
-
-	//	
-	//}
 
 	return true;
 }
@@ -496,7 +573,7 @@ void ModuleNetworkingServer::onSocketDisconnected(SOCKET socket)
 			std::string msg = "|[Server]: " + connectedSocket.playerName;
 			msg.append(" disconnected");
 			messagePacket << msg;
-			messagePacket << Color(0,255,0);
+			messagePacket << Color(0, 255, 0);
 
 			for (ConnectedSocket& connectedSocket : connectedSockets)
 			{
