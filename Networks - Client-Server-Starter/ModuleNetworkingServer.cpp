@@ -294,7 +294,7 @@ void ModuleNetworkingServer::HandleHelpCommand(Color& color, SOCKET socket)
 
 	outputPacket << ServerMessage::Message;
 
-	std::string commandList = "|[Server]: Command List: \n\n/clear -> Clears all messages \n\n/kick [username] -> Kicks the user from the chat \n\n/change_name [new_username] -> Changes username to [new_username] \n\n/ban [username] -> Bans [username] from the server. If someone has [username], he will be disconnected \n\n/whisper [username]: [message] -> Sends a whisper cotaining [message] to [username] \n\n/change_color [R: 0-255]/[G: 0-255]/[B: 0-255] -> Changes your color to the RBG one";
+	std::string commandList = "|[Server]: Command List: \n\n/clear -> Clears all messages \n\n/kick [username] -> Kicks the user from the chat \n\n/change_name [new_username] -> Changes username to [new_username] \n\n/ban [username] -> Bans [username] from the server. If someone has [username], he will be disconnected \n\n/whisper [username]: [message] -> Sends a whisper containing [message] to [username] \n\n/change_color [R: 0-255]/[G: 0-255]/[B: 0-255] -> Changes your color to the RBG one";
 	outputPacket << commandList;
 	outputPacket << Color(0, 255, 0);
 	sendPacket(outputPacket, socket);
