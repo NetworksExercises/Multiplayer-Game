@@ -234,7 +234,7 @@ bool ModuleNetworkingServer::HandleHelloPacket(std::string& msg, Color& color, S
 		{
 			// --- If playername is banned, stop connection ---
 			outputPacket << ServerMessage::UnWelcome;
-			outputPacket << "Sorry, this player is banned";
+			outputPacket << "|[Server]: Sorry, this player is banned";
 			outputPacket << Color(0, 255, 0);
 			sendPacket(outputPacket, socket);
 			return false;
@@ -249,7 +249,7 @@ bool ModuleNetworkingServer::HandleHelloPacket(std::string& msg, Color& color, S
 		{
 			// --- If playername does not exist ---
 			outputPacket << ServerMessage::UnWelcome;
-			outputPacket << "Sorry, this user is already connected change your name";
+			outputPacket << "|[Server]: Sorry, this user is already connected change your name";
 			outputPacket << Color(0, 255, 0);
 			sendPacket(outputPacket, socket);
 			return false;
@@ -263,7 +263,7 @@ bool ModuleNetworkingServer::HandleHelloPacket(std::string& msg, Color& color, S
 
 	// --- If playername does not exist, send welcome package and assign name ---
 	outputPacket << ServerMessage::Welcome;
-	outputPacket << "Welcome!!!";
+	outputPacket << "|[Server]: Welcome!!!";
 	outputPacket << color;
 	sendPacket(outputPacket, socket);
 
@@ -418,7 +418,7 @@ void ModuleNetworkingServer::HandleChangeColorCommand(std::string& msg, Color& c
 	msg.shrink_to_fit();
 
 	//Usermame to be changed is found by getting a substring without the sender name and /kick 
-	std::string col = "/change_color";
+	std::string col = "/change_color"; 
 	int changeSize = strlen(col.c_str());
 
 	int senderIndex = msg.find(col);
@@ -515,7 +515,7 @@ void ModuleNetworkingServer::HandleChangeColorCommand(std::string& msg, Color& c
 void ModuleNetworkingServer::HandleListCommand(std::string& msg, Color& color, SOCKET socket)
 {
 	OutputMemoryStream outputPacket;
-	std::string tmp = "The connected players are: \n";
+	std::string tmp = "|[Server]: The connected players are: \n";
 
 	outputPacket << ServerMessage::Message;
 
@@ -528,7 +528,7 @@ void ModuleNetworkingServer::HandleListCommand(std::string& msg, Color& color, S
 	}
 
 	outputPacket << tmp;
-	outputPacket << color;
+	outputPacket << Color(0,255,0);
 	sendPacket(outputPacket, socket);
 }
 
@@ -553,10 +553,10 @@ void ModuleNetworkingServer::HandleWhisperCommand(std::string& msg, Color& color
 	//Failsave so that the sender knows
 	if (messageMarker == std::string::npos)
 	{
-		std::string tmp = "Whisper syntax -> /whisper [username]: [message]";
+		std::string tmp = "|[Server]: Whisper syntax -> /whisper [username]: [message]";
 		outputPacket << ServerMessage::Message;
 		outputPacket << tmp;
-		outputPacket << color;
+		outputPacket << Color(0, 255, 0);
 
 		sendPacket(outputPacket, socket);
 		return;
@@ -571,10 +571,10 @@ void ModuleNetworkingServer::HandleWhisperCommand(std::string& msg, Color& color
 	}
 	else
 	{
-		std::string tmp = "Add a message to your whisper please";
+		std::string tmp = "|[Server]: Add a message to your whisper please";
 		outputPacket << ServerMessage::Message;
 		outputPacket << tmp;
-		outputPacket << color;
+		outputPacket << Color(0, 255, 0);
 
 		sendPacket(outputPacket, socket);
 		return;
