@@ -114,7 +114,7 @@ bool ModuleNetworkingClient::gui()
 						item = messages[i].message;
 						key = item.substr(0, 1);
 
-						ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(messages[i].color.r/255, messages[i].color.g/255, messages[i].color.b/255, 255));
+						ImGui::PushStyleColor(ImGuiCol_Text, ImVec4((float)messages[i].color.r/255, (float)messages[i].color.g/255, (float)messages[i].color.b/255, 255));
 
 						// --- If text does not match the filter don't print it ---
 						if (!filter.PassFilter(item.c_str()))

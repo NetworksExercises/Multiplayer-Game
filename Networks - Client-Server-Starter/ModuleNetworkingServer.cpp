@@ -104,7 +104,7 @@ bool ModuleNetworkingServer::gui()
 				connectedSocket.address.sin_addr.S_un.S_un_b.s_b4,
 				ntohs(connectedSocket.address.sin_port));
 
-			ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(connectedSocket.color.r / 255, connectedSocket.color.g / 255, connectedSocket.color.b / 255, 255));
+			ImGui::PushStyleColor(ImGuiCol_Text, ImVec4((float)connectedSocket.color.r / 255, (float)connectedSocket.color.g / 255, (float)connectedSocket.color.b / 255, 255));
 
 			ImGui::Text("Player name: %s", connectedSocket.playerName.c_str());
 
