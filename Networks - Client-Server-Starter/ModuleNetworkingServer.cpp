@@ -274,9 +274,9 @@ bool ModuleNetworkingServer::HandleHelloPacket(std::string& msg, Color& color, S
 		// --- Notify all users a player joined ---
 		OutputMemoryStream messagePacket;
 		messagePacket << ServerMessage::Message;
-		std::string msg = "|[Server]: " + msg;
-		msg.append(" joined");
-		messagePacket << msg;
+		std::string new_msg = "|[Server]: " + msg;
+		new_msg.append(" joined");
+		messagePacket << new_msg;
 		messagePacket << Color(0, 255, 0);
 
 		for (ConnectedSocket& connectedSocket : connectedSockets)
