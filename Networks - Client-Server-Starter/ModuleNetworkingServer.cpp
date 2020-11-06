@@ -142,418 +142,54 @@ bool ModuleNetworkingServer::onSocketReceivedData(SOCKET socket, const InputMemo
 	ClientMessage clientMessage;
 	packet >> clientMessage;
 
+	std::string msg;
+	Color color;
+	packet >> msg;
+	packet >> color;
+
+
 	// Set the player name of the corresponding connected socket proxy
 	if (clientMessage == ClientMessage::Hello)
-	{
-		std::string playerName;
-		Color col;
-		packet >> playerName;
-		packet >> col;
-		// --- Check if the player name is in the banned list ---
+		return HandleHelloPacket(msg, color, socket);
 
-		for (std::string pName : banned_players)
-		{
-			if (pName == playerName)
-			{
-				// --- If playername is banned, stop connection ---
-				OutputMemoryStream UnWelcomePacket;
-				UnWelcomePacket << ServerMessage::UnWelcome;
-				UnWelcomePacket << "Sorry, this player is banned";
-				UnWelcomePacket << Color(0, 255, 0);
-				sendPacket(UnWelcomePacket, socket);
-				return false;
-			}
-		}
-
-
-		ConnectedSocket* connectedSocketRef = nullptr;
-
-		for (ConnectedSocket& connectedSocket : connectedSockets)
-		{
-			if (connectedSocket.playerName == playerName)
-			{
-				// --- If playername does not exist ---
-				OutputMemoryStream UnWelcomePacket;
-				UnWelcomePacket << ServerMessage::UnWelcome;
-				UnWelcomePacket << "Sorry, this user is already connected change your name";
-				UnWelcomePacket << Color(0, 255, 0);
-				sendPacket(UnWelcomePacket, socket);
-				return false;
-			}
-
-			if (connectedSocket.socket == socket)
-			{
-				connectedSocketRef = &connectedSocket;
-			}
-		}
-
-		// --- If playername does not exist, send welcome package and assign name ---
-		OutputMemoryStream WelcomePacket;
-		WelcomePacket << ServerMessage::Welcome;
-		WelcomePacket << "Welcome!!!";
-		WelcomePacket << col;
-		sendPacket(WelcomePacket, socket);
- 
-		if (connectedSocketRef)
-		{
-			connectedSocketRef->playerName = playerName;
-
-			// --- Notify all users a player joined ---
-			OutputMemoryStream messagePacket;
-			messagePacket << ServerMessage::Message;
-			std::string msg = "|[Server]: " + playerName;
-			msg.append(" joined");
-			messagePacket << msg;
-			messagePacket << Color(0, 255, 0);
-
-			for (ConnectedSocket& connectedSocket : connectedSockets)
-			{
-				sendPacket(messagePacket, connectedSocket.socket);
-			}
-		}
-	}
 	else if (clientMessage == ClientMessage::Message)
 	{
 		// --- If playername does not exist ---
-		OutputMemoryStream messagePacket;
-		
-		std::string msg;
-		Color color;
-		packet >> msg;
-		packet >> color;
 
 		if (msg.find("/help") != std::string::npos)
-		{
-			messagePacket << ServerMessage::Message;
+			HandleHelpCommand(color, socket);
 
-			std::string commandList = "Command List : \n /clear -> Clears all messages \n /kick [username] -> Kicks the user from the chat";
-			messagePacket << commandList;
-			messagePacket << color;
-			sendPacket(messagePacket, socket);
-		}
 		else if (msg.find("/kick") != std::string::npos)
-		{
-			msg.shrink_to_fit();
+			HandleKickCommand(msg, color, socket);
 
-			//Usermame to be kicked is found by getting a substring without the sender name and /kick 
-			std::string kick;
-			kick = "/kick";
-			int kickSize = strlen(kick.c_str());
-
-			int senderIndex = msg.find(kick);
-			std::string senderName = msg.substr(0, senderIndex - 2);
-
-			messagePacket << ServerMessage::Kick;
-			messagePacket << senderName;
-			messagePacket << color;
-
-			for (ConnectedSocket& connectedSocket : connectedSockets)
-			{
-				std::string player_to_kick;
-
-				if (msg.length() > (senderIndex + kickSize + 1))
-				{
-					player_to_kick = msg.substr(senderIndex + kickSize + 1, std::string::npos);
-
-					if (player_to_kick == connectedSocket.playerName)
-					{
-						sendPacket(messagePacket, connectedSocket.socket);
-						onSocketDisconnected(connectedSocket.socket);
-						break;
-					}
-				}
-			}
-		}
 		else if (msg.find("/change_name") != std::string::npos)
-		{
-			msg.shrink_to_fit();
+			HandleChangeNameCommand(msg, color, socket);
 
-			//Usermame to be changed is found by getting a substring without the sender name and /kick 
-			std::string change_name;
-			change_name = "/change_name";
-			int changeSize = strlen(change_name.c_str());
-
-			int senderIndex = msg.find(change_name);
-			std::string senderName = msg.substr(0, senderIndex - 2);
-
-			messagePacket << ServerMessage::ChangeName;
-			
-			for (ConnectedSocket& connectedSocket : connectedSockets)
-			{
-				std::string name_to_change;
-
-				if (msg.length() > (senderIndex + changeSize + 1))
-				{
-					name_to_change = msg.substr(senderIndex + changeSize + 1, std::string::npos);
-
-					if (senderName == connectedSocket.playerName)
-					{
-						connectedSocket.playerName = name_to_change;
-
-						std::string notice = (" has changed his name to: ");
-						senderName.append(notice);
-						senderName.append(name_to_change);
-						messagePacket << senderName;
-						messagePacket << color;
-
-						sendPacket(messagePacket, socket);
-						break;
-					}
-				}
-			}
-		}
 		else if (msg.find("/ban") != std::string::npos)
-		{
-			msg.shrink_to_fit();
+			HandleBanCommand(msg, color, socket);
 
-			//Usermame to be changed is found by getting a substring without the sender name and /kick 
-			std::string ban;
-			ban = "/ban";
-			int changeSize = strlen(ban.c_str());
-
-			int senderIndex = msg.find(ban);
-			std::string senderName = msg.substr(0, senderIndex - 2);
-
-			messagePacket << ServerMessage::Ban;
-
-			for (ConnectedSocket& connectedSocket : connectedSockets)
-			{
-				std::string name_to_ban;
-
-				if (msg.length() > (senderIndex + changeSize + 1))
-				{
-					name_to_ban = msg.substr(senderIndex + changeSize + 1, std::string::npos);
-
-					if (name_to_ban == connectedSocket.playerName)
-					{
-						messagePacket << senderName;
-						messagePacket << color;
-
-						banned_players.push_back(name_to_ban);
-
-						sendPacket(messagePacket, connectedSocket.socket);
-
-						onSocketDisconnected(connectedSocket.socket);
-						break;
-					}
-				}
-			}
-		}
 		else if (msg.find("/change_color") != std::string::npos)
-		{
-			// --- Syntax: /change_color 255,255,255 ---
+			HandleChangeColorCommand(msg, color, socket);
 
-			msg.shrink_to_fit();
-
-			//Usermame to be changed is found by getting a substring without the sender name and /kick 
-			std::string col;
-			col = "/change_color";
-			int changeSize = strlen(col.c_str());
-
-			int senderIndex = msg.find(col);
-			std::string senderName = msg.substr(0, senderIndex - 2);
-
-			Color new_color;
-
-			int color_index = senderIndex + changeSize;
-
-			std::string color_msg = msg.substr(color_index + 1, std::string::npos);
-
-
-			int coma_index = color_msg.find("/");
-			std::string color_value;
-
-			if (coma_index != std::string::npos)
-			{
-				// --- Find red value ---
-				color_value = color_msg.substr(0, coma_index);
-
-				try
-				{
-					new_color.r = std::stoi(color_value);
-				}
-				catch (std::invalid_argument)
-				{
-					LOG("Couldn't read color from: %s", senderName.c_str());
-					return true;
-				}
-
-				color_msg = color_msg.substr(coma_index + 1, std::string::npos);
-
-				// --- Find green value ---
-				coma_index = color_msg.find("/");
-
-				if (coma_index != std::string::npos)
-				{
-					color_value = color_msg.substr(0, coma_index);
-
-					try
-					{
-						new_color.g = std::stoi(color_value);
-					}
-					catch (std::invalid_argument)
-					{
-						LOG("Couldn't read color from: %s", senderName.c_str());
-						return true;
-					}
-				}
-
-				// --- Find blue value;
-
-				//color_msg = color_msg.substr(coma_index + 1, std::string::npos);
-				coma_index = color_msg.find("/");
-
-				if (coma_index != std::string::npos)
-				{
-					color_value = color_msg.substr(coma_index + 1, std::string::npos);
-
-					try
-					{
-						new_color.b = std::stoi(color_value);
-					}
-					catch (std::invalid_argument)
-					{
-						LOG("Couldn't read color from: %s", senderName.c_str());
-						return true;
-					}
-				}
-
-				std::string new_message = senderName;
-				new_message.append(" changed color.");
-
-				messagePacket << ServerMessage::ChangeColor;
-				messagePacket << new_message;
-				messagePacket << new_color;
-
-				for (ConnectedSocket& connectedSocket : connectedSockets)
-				{
-					if (connectedSocket.socket == socket)
-						connectedSocket.color = new_color;
-
-					sendPacket(messagePacket, connectedSocket.socket);
-				}
-
-
-				//sendPacket(messagePacket, socket);		
-			}
-
-		}
 		else if (msg.find("/list") != std::string::npos)
-		{
-			std::string tmp;
-			tmp = "The connected players are: \n";
+			HandleListCommand(msg, color, socket);
 
-			messagePacket << ServerMessage::Message;
-			
-			for (ConnectedSocket& connectedSocket : connectedSockets)
-			{
-				std::string connectedPlayer = "- " + connectedSocket.playerName + "\n";
-				tmp.append(connectedPlayer);
-			}
-
-			messagePacket << tmp;
-			messagePacket << color;
-			sendPacket(messagePacket, socket);
-		}
 		else if (msg.find("/whisper") != std::string::npos)
-		{
-			msg.shrink_to_fit();
+			HandleWhisperCommand(msg, color, socket);
 
-			//Usermame to be kicked is found by getting a substring without the sender name and /kick 
-			std::string whisper;
-			whisper = "/whisper";
-			int whisperSize = strlen(whisper.c_str());
-
-			int senderIndex = msg.find(whisper);
-			std::string senderName = msg.substr(0, senderIndex - 2);
-
-			//Message without the sender's name and :
-			std::string tmp;
-			tmp = msg.substr(senderIndex, std::string::npos);
-
-			int messageMarker = tmp.find(":");
-
-			//Failsave so that the sender knows
-			if (messageMarker == std::string::npos)
-			{
-				std::string tmp;
-				tmp = "Whisper syntax -> /whisper [username]: [message]";
-				messagePacket << ServerMessage::Message;
-				messagePacket << tmp;
-				messagePacket << color;
-
-				sendPacket(messagePacket, socket);
-				return true;
-			}
-
-			int playerNameLength = (messageMarker) - (whisperSize) - 1;
-			std::string message;
-
-			if (tmp.length() - 1 > (whisperSize + playerNameLength + 1))
-			{
-				message = tmp.substr(messageMarker + 2, std::string::npos);
-			}
-			else
-			{
-				std::string tmp;
-				tmp = "Add a message to your whisper please";
-				messagePacket << ServerMessage::Message;
-				messagePacket << tmp;
-				messagePacket << color;
-
-				sendPacket(messagePacket, socket);
-				return true;
-			}
-
-			for (ConnectedSocket& connectedSocket : connectedSockets)
-			{
-				std::string player_to_send;
-				std::string actual_message;
-				
-				player_to_send = tmp.substr(whisperSize + 1, playerNameLength);
-		
-				if (player_to_send == connectedSocket.playerName)
-				{
-					/*std::string auxStr;
-					auxStr = "You sent you a whisper to ";*/
-					senderName.append(" has sent a whisper to ");
-					senderName.append(player_to_send + ": ");
-					senderName.append(message);
-
-					messagePacket << ServerMessage::Message;
-					messagePacket << senderName;
-					messagePacket << Color(255, 0, 255);
-
-					//Sends a packet for both sender and receiver
-					sendPacket(messagePacket, connectedSocket.socket);
-					sendPacket(messagePacket, socket);
-
-					/*OutputMemoryStream tmpPacket;
-
-					auxStr.append(player_to_send);
-					auxStr.append(" " + message);
-
-					tmpPacket << ServerMessage::Message;
-					tmpPacket << senderName;
-					tmpPacket << Color(255, 0, 255);
-
-					tmpPacket << auxStr;*/
-					break;
-				}
-			}
-		}
 		else
 		{
-			messagePacket << ServerMessage::Message;
-			messagePacket << msg;
-			messagePacket << color;
+			OutputMemoryStream outputPacket;
+
+			outputPacket << ServerMessage::Message;
+			outputPacket << msg;
+			outputPacket << color;
 
 			for (ConnectedSocket& connectedSocket : connectedSockets)
 			{
-				sendPacket(messagePacket, connectedSocket.socket);
+				sendPacket(outputPacket, connectedSocket.socket);
 			}
-		}
-		
+		}		
 	}
 
 	return true;
@@ -581,6 +217,378 @@ void ModuleNetworkingServer::onSocketDisconnected(SOCKET socket)
 			}
 
 			connectedSockets.erase(it);
+
+			break;
+		}
+	}
+}
+
+bool ModuleNetworkingServer::HandleHelloPacket(std::string& msg, Color& color, SOCKET socket)
+{
+	OutputMemoryStream outputPacket;
+
+	// --- Check if the player name is in the banned list ---
+	for (std::string pName : banned_players)
+	{
+		if (pName == msg)
+		{
+			// --- If playername is banned, stop connection ---
+			outputPacket << ServerMessage::UnWelcome;
+			outputPacket << "Sorry, this player is banned";
+			outputPacket << Color(0, 255, 0);
+			sendPacket(outputPacket, socket);
+			return false;
+		}
+	}
+
+	ConnectedSocket* connectedSocketRef = nullptr;
+
+	for (ConnectedSocket& connectedSocket : connectedSockets)
+	{
+		if (connectedSocket.playerName == msg)
+		{
+			// --- If playername does not exist ---
+			outputPacket << ServerMessage::UnWelcome;
+			outputPacket << "Sorry, this user is already connected change your name";
+			outputPacket << Color(0, 255, 0);
+			sendPacket(outputPacket, socket);
+			return false;
+		}
+
+		if (connectedSocket.socket == socket)
+		{
+			connectedSocketRef = &connectedSocket;
+		}
+	}
+
+	// --- If playername does not exist, send welcome package and assign name ---
+	outputPacket << ServerMessage::Welcome;
+	outputPacket << "Welcome!!!";
+	outputPacket << color;
+	sendPacket(outputPacket, socket);
+
+	if (connectedSocketRef)
+	{
+		connectedSocketRef->playerName = msg;
+
+		// --- Notify all users a player joined ---
+		OutputMemoryStream messagePacket;
+		messagePacket << ServerMessage::Message;
+		std::string msg = "|[Server]: " + msg;
+		msg.append(" joined");
+		messagePacket << msg;
+		messagePacket << Color(0, 255, 0);
+
+		for (ConnectedSocket& connectedSocket : connectedSockets)
+		{
+			sendPacket(messagePacket, connectedSocket.socket);
+		}
+	}
+
+	return true;
+}
+
+void ModuleNetworkingServer::HandleHelpCommand(Color& color, SOCKET socket)
+{
+	OutputMemoryStream outputPacket;
+
+	outputPacket << ServerMessage::Message;
+
+	std::string commandList = "Command List : \n /clear -> Clears all messages \n /kick [username] -> Kicks the user from the chat";
+	outputPacket << commandList;
+	outputPacket << color;
+	sendPacket(outputPacket, socket);
+}
+
+void ModuleNetworkingServer::HandleKickCommand(std::string& msg, Color& color, SOCKET socket)
+{
+	OutputMemoryStream outputPacket;
+
+	msg.shrink_to_fit();
+
+	//Username to be kicked is found by getting a substring without the sender name and /kick 
+	std::string kick = "/kick";
+	int kickSize = strlen(kick.c_str());
+
+	int senderIndex = msg.find(kick);
+	std::string senderName = msg.substr(0, senderIndex - 2);
+
+	outputPacket << ServerMessage::Kick;
+	outputPacket << senderName;
+	outputPacket << color;
+
+	if (msg.length() > (senderIndex + kickSize + 1))
+	{
+		for (ConnectedSocket& connectedSocket : connectedSockets)
+		{
+			std::string player_to_kick = msg.substr(senderIndex + kickSize + 1, std::string::npos);
+
+			if (player_to_kick == connectedSocket.playerName)
+			{
+				sendPacket(outputPacket, connectedSocket.socket);
+				onSocketDisconnected(connectedSocket.socket);
+				break;
+			}
+
+		}
+	}
+}
+
+void ModuleNetworkingServer::HandleChangeNameCommand(std::string& msg, Color& color, SOCKET socket)
+{
+	OutputMemoryStream outputPacket;
+
+	msg.shrink_to_fit();
+
+	//Username to be changed is found by getting a substring without the sender name and /kick 
+	std::string change_name = "/change_name";
+	int changeSize = strlen(change_name.c_str());
+
+	int senderIndex = msg.find(change_name);
+	std::string senderName = msg.substr(0, senderIndex - 2);
+
+	outputPacket << ServerMessage::ChangeName;
+
+	if (msg.length() > (senderIndex + changeSize + 1))
+	{
+		for (ConnectedSocket& connectedSocket : connectedSockets)
+		{
+			std::string name_to_change = msg.substr(senderIndex + changeSize + 1, std::string::npos);
+
+			if (senderName == connectedSocket.playerName)
+			{
+				connectedSocket.playerName = name_to_change;
+
+				std::string notice = (" has changed his name to: ");
+				senderName.append(notice);
+				senderName.append(name_to_change);
+				outputPacket << senderName;
+				outputPacket << color;
+
+				sendPacket(outputPacket, socket);
+				break;
+			}
+
+		}
+	}
+}
+
+void ModuleNetworkingServer::HandleBanCommand(std::string& msg, Color& color, SOCKET socket)
+{
+	OutputMemoryStream outputPacket;
+
+	msg.shrink_to_fit();
+
+	//Username to be changed is found by getting a substring without the sender name and /kick 
+	std::string ban = "/ban";
+	int changeSize = strlen(ban.c_str());
+
+	int senderIndex = msg.find(ban);
+	std::string senderName = msg.substr(0, senderIndex - 2);
+
+	outputPacket << ServerMessage::Ban;
+
+	if (msg.length() > (senderIndex + changeSize + 1))
+	{
+		for (ConnectedSocket& connectedSocket : connectedSockets)
+		{
+			std::string name_to_ban = msg.substr(senderIndex + changeSize + 1, std::string::npos);
+
+			if (name_to_ban == connectedSocket.playerName)
+			{
+				outputPacket << senderName;
+				outputPacket << color;
+
+				banned_players.push_back(name_to_ban);
+
+				sendPacket(outputPacket, connectedSocket.socket);
+
+				onSocketDisconnected(connectedSocket.socket);
+				break;
+			}		
+		}
+	}
+}
+
+void ModuleNetworkingServer::HandleChangeColorCommand(std::string& msg, Color& color, SOCKET socket)
+{
+	// --- Syntax: /change_color 255,255,255 ---
+	OutputMemoryStream outputPacket;
+
+	msg.shrink_to_fit();
+
+	//Usermame to be changed is found by getting a substring without the sender name and /kick 
+	std::string col = "/change_color";
+	int changeSize = strlen(col.c_str());
+
+	int senderIndex = msg.find(col);
+	std::string senderName = msg.substr(0, senderIndex - 2);
+
+	Color new_color;
+
+	int color_index = senderIndex + changeSize;
+
+	std::string color_msg = msg.substr(color_index + 1, std::string::npos);
+
+	int coma_index = color_msg.find("/");
+	std::string color_value;
+
+	if (coma_index != std::string::npos)
+	{
+		// --- Find red value ---
+		color_value = color_msg.substr(0, coma_index);
+
+		try
+		{
+			new_color.r = std::stoi(color_value);
+		}
+		catch (std::invalid_argument)
+		{
+			LOG("Couldn't read color from: %s", senderName.c_str());
+			return;
+		}
+
+		color_msg = color_msg.substr(coma_index + 1, std::string::npos);
+
+		// --- Find green value ---
+		coma_index = color_msg.find("/");
+
+		if (coma_index != std::string::npos)
+		{
+			color_value = color_msg.substr(0, coma_index);
+
+			try
+			{
+				new_color.g = std::stoi(color_value);
+			}
+			catch (std::invalid_argument)
+			{
+				LOG("Couldn't read color from: %s", senderName.c_str());
+				return;
+			}
+		}
+
+		// --- Find blue value ---
+
+		coma_index = color_msg.find("/");
+
+		if (coma_index != std::string::npos)
+		{
+			color_value = color_msg.substr(coma_index + 1, std::string::npos);
+
+			try
+			{
+				new_color.b = std::stoi(color_value);
+			}
+			catch (std::invalid_argument)
+			{
+				LOG("Couldn't read color from: %s", senderName.c_str());
+				return;
+			}
+		}
+
+		std::string new_message = senderName;
+		new_message.append(" changed color.");
+
+		outputPacket << ServerMessage::ChangeColor;
+		outputPacket << new_message;
+		outputPacket << new_color;
+
+		for (ConnectedSocket& connectedSocket : connectedSockets)
+		{
+			if (connectedSocket.socket == socket)
+				connectedSocket.color = new_color;
+
+			sendPacket(outputPacket, connectedSocket.socket);
+		}
+	}
+}
+
+void ModuleNetworkingServer::HandleListCommand(std::string& msg, Color& color, SOCKET socket)
+{
+	OutputMemoryStream outputPacket;
+	std::string tmp = "The connected players are: \n";
+
+	outputPacket << ServerMessage::Message;
+
+	std::string connectedPlayer;
+
+	for (ConnectedSocket& connectedSocket : connectedSockets)
+	{
+		connectedPlayer = "- " + connectedSocket.playerName + "\n";
+		tmp.append(connectedPlayer);
+	}
+
+	outputPacket << tmp;
+	outputPacket << color;
+	sendPacket(outputPacket, socket);
+}
+
+void ModuleNetworkingServer::HandleWhisperCommand(std::string& msg, Color& color, SOCKET socket)
+{
+	OutputMemoryStream outputPacket;
+
+	msg.shrink_to_fit();
+
+	//Usermame to be kicked is found by getting a substring without the sender name and /kick 
+	std::string whisper = "/whisper";
+	int whisperSize = strlen(whisper.c_str());
+
+	int senderIndex = msg.find(whisper);
+	std::string senderName = msg.substr(0, senderIndex - 2);
+
+	//Message without the sender's name and :
+	std::string tmp = msg.substr(senderIndex, std::string::npos);
+
+	int messageMarker = tmp.find(":");
+
+	//Failsave so that the sender knows
+	if (messageMarker == std::string::npos)
+	{
+		std::string tmp = "Whisper syntax -> /whisper [username]: [message]";
+		outputPacket << ServerMessage::Message;
+		outputPacket << tmp;
+		outputPacket << color;
+
+		sendPacket(outputPacket, socket);
+		return;
+	}
+
+	int playerNameLength = (messageMarker)-(whisperSize)-1;
+	std::string message;
+
+	if (tmp.length() - 1 > (whisperSize + playerNameLength + 1))
+	{
+		message = tmp.substr(messageMarker + 2, std::string::npos);
+	}
+	else
+	{
+		std::string tmp = "Add a message to your whisper please";
+		outputPacket << ServerMessage::Message;
+		outputPacket << tmp;
+		outputPacket << color;
+
+		sendPacket(outputPacket, socket);
+		return;
+	}
+
+	for (ConnectedSocket& connectedSocket : connectedSockets)
+	{
+		std::string player_to_send = tmp.substr(whisperSize + 1, playerNameLength);
+
+		if (player_to_send == connectedSocket.playerName)
+		{
+			senderName.append(" has sent a whisper to ");
+			senderName.append(player_to_send + ": ");
+			senderName.append(message);
+
+			outputPacket << ServerMessage::Message;
+			outputPacket << senderName;
+			outputPacket << Color(255, 0, 255);
+
+			//Sends a packet for both sender and receiver
+			sendPacket(outputPacket, connectedSocket.socket);
+			sendPacket(outputPacket, socket);
 
 			break;
 		}

@@ -41,7 +41,15 @@ private:
 	void onSocketDisconnected(SOCKET socket) override;
 
 
+	bool HandleHelloPacket(std::string & msg, Color & color, SOCKET socket);
 
+	void HandleHelpCommand(Color& color, SOCKET socket);
+	void HandleKickCommand(std::string& msg, Color& color, SOCKET socket);
+	void HandleChangeNameCommand(std::string& msg, Color& color, SOCKET socket);
+	void HandleBanCommand(std::string& msg, Color& color, SOCKET socket);
+	void HandleChangeColorCommand(std::string& msg, Color& color, SOCKET socket);
+	void HandleListCommand(std::string& msg, Color& color, SOCKET socket);
+	void HandleWhisperCommand(std::string& msg, Color& color, SOCKET socket);
 
 
 	//////////////////////////////////////////////////////////////////////

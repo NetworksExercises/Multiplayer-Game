@@ -107,8 +107,6 @@ bool ModuleNetworkingClient::gui()
 
 					ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(2, 1)); // Tighten spacing
 					
-					//static std::string server_key = "|";
-
 					std::string key;
 					std::string item;
 
@@ -117,10 +115,6 @@ bool ModuleNetworkingClient::gui()
 						item = messages[i].message;
 						key = item.substr(0, 1);
 
-						// --- Display error messages in red color ---
-						//if (key == server_key)
-						//	ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.75, 0.75, 0, 255));
-						//else
 						ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(messages[i].color.r/255, messages[i].color.g/255, messages[i].color.b/255, 255));
 
 						// --- If text does not match the filter don't print it ---
@@ -226,17 +220,7 @@ bool ModuleNetworkingClient::onSocketReceivedData(SOCKET socket, const InputMemo
 
 		if (msg.find(playerName) != std::string::npos)
 			myColor = color;
-	}
-	/*else if ()
-	{
-		messages.push_back(msg);
-	}*/
-	//}
-	// --- Another client has sent a message ---
-	//else if (serverMessage == ServerMessage::Message)
-	//{
-	//	messages.push_back(msg);
-	
+	}	
 
 	return true;
 }

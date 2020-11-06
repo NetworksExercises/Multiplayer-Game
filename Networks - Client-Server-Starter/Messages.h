@@ -6,8 +6,7 @@
 enum class ClientMessage
 {
 	Hello,
-	Message,
-	Command
+	Message
 };
 
 enum class ServerMessage
