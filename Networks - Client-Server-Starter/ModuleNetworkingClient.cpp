@@ -96,7 +96,6 @@ bool ModuleNetworkingClient::gui()
 				ImGui::Separator();
 
 				ImGuiWindowFlags scrollFlags = 0;
-				scrollFlags |= ImGuiWindowFlags_HorizontalScrollbar;
 				scrollFlags |= ImGuiWindowFlags_AlwaysVerticalScrollbar;
 
 				ImGui::SetKeyboardFocusHere();
@@ -124,7 +123,7 @@ bool ModuleNetworkingClient::gui()
 							continue;
 						}
 
-						ImGui::TextUnformatted(item.c_str());
+						ImGui::TextWrapped(item.c_str());
 						ImGui::PopStyleColor();
 
 					}
