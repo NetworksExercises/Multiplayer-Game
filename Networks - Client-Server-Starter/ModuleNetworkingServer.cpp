@@ -426,9 +426,13 @@ void ModuleNetworkingServer::HandleChangeColorCommand(std::string& msg, Color& c
 
 	Color new_color;
 
-	int color_index = senderIndex + changeSize;
+	int color_index = senderIndex + changeSize + 1;
 
-	std::string color_msg = msg.substr(color_index + 1, std::string::npos);
+	// --- There is no color attached ---
+	if (color_index >= msg.size())
+		return;
+
+	std::string color_msg = msg.substr(color_index, std::string::npos);
 
 	int coma_index = color_msg.find("/");
 	std::string color_value;
@@ -467,6 +471,8 @@ void ModuleNetworkingServer::HandleChangeColorCommand(std::string& msg, Color& c
 				return;
 			}
 		}
+		else
+			return;
 
 		// --- Find blue value ---
 
@@ -486,6 +492,8 @@ void ModuleNetworkingServer::HandleChangeColorCommand(std::string& msg, Color& c
 				return;
 			}
 		}
+		else
+			return;
 
 		std::string new_message = senderName;
 		new_message.append(" changed color.");
