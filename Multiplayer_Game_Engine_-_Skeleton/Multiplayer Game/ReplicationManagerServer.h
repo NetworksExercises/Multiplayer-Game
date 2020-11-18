@@ -10,5 +10,7 @@ public:
 	void update(uint32 networkId);
 	void destroy(uint32 networkId);
 
-	void write(OutputMemoryStream &packet);
+	void write(OutputMemoryStream &packet, ReplicationCommand action);
+
+	uint32 netId;
 };

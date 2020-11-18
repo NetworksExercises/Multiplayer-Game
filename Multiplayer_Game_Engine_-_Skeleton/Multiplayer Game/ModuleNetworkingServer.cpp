@@ -146,6 +146,7 @@ void ModuleNetworkingServer::onPacketReceived(const InputMemoryStream &packet, c
 					GameObject *gameObject = networkGameObjects[i];
 					
 					// TODO(you): World state replication lab session
+					//proxy->RepManager_s.create(gameObject->networkId);
 				}
 
 				LOG("Message received: hello - from player %s", proxy->name.c_str());
@@ -247,6 +248,9 @@ void ModuleNetworkingServer::onUpdate()
 
 				// TODO(you): World state replication lab session
 
+				//if(clientProxy.gameObject)
+					//clientProxy.RepManager_s.update(clientProxy.gameObject->networkId);
+		
 				// TODO(you): Reliability on top of UDP lab session
 			}
 		}
@@ -388,6 +392,7 @@ GameObject * ModuleNetworkingServer::instantiateNetworkObject()
 		if (clientProxies[i].connected)
 		{
 			// TODO(you): World state replication lab session
+			clientProxies->RepManager_s.create(gameObject->networkId);
 		}
 	}
 
@@ -396,12 +401,13 @@ GameObject * ModuleNetworkingServer::instantiateNetworkObject()
 
 void ModuleNetworkingServer::updateNetworkObject(GameObject * gameObject)
 {
-	// Notify all client proxies' replication manager to destroy the object remotely
+	// Notify all client proxies' replication manager to destroy (Aitor: update?) the object remotely
 	for (int i = 0; i < MAX_CLIENTS; ++i)
 	{
 		if (clientProxies[i].connected)
 		{
 			// TODO(you): World state replication lab session
+			clientProxies->RepManager_s.update(gameObject->networkId);
 		}
 	}
 }
@@ -414,6 +420,7 @@ void ModuleNetworkingServer::destroyNetworkObject(GameObject * gameObject)
 		if (clientProxies[i].connected)
 		{
 			// TODO(you): World state replication lab session
+			clientProxies->RepManager_s.destroy(gameObject->networkId);
 		}
 	}
 
