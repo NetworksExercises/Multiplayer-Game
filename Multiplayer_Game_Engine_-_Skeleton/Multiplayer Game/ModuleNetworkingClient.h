@@ -95,7 +95,7 @@ private:
 
 	// TODO(you): World state replication lab session
 
-
+	ReplicationManagerClient RepManager_c;
 
 	//////////////////////////////////////////////////////////////////////
 	// Delivery manager
