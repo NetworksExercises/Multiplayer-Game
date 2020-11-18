@@ -55,6 +55,8 @@ private:
 		float secondsSinceLastPing = 0.0f;
 
 		// TODO(you): World state replication lab session
+		ReplicationManagerServer RepManager_s;
+
 		// TODO(you): Reliability on top of UDP lab session
 
 		uint32 nextExpectedInputSequenceNumber = 0;
