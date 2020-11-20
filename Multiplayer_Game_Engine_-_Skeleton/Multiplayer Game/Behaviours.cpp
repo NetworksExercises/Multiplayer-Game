@@ -32,9 +32,6 @@ void Laser::update()
 }
 
 
-
-
-
 void Spaceship::start()
 {
 	gameObject->tag = (uint32)(Random.next() * UINT_MAX);

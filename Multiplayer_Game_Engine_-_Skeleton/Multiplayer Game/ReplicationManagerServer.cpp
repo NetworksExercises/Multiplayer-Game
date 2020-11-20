@@ -5,43 +5,53 @@
 
 void ReplicationManagerServer::create(uint32 networkId)
 {
-	netId = networkId;
+	OutputMemoryStream packet;
+	ReplicationCommand cmd(ReplicationAction::Create, networkId);
+
+	// --- Fill packet ---
+	write(packet, cmd);
+
+	// --- Send packet ---
+
+
 }
 
 void ReplicationManagerServer::update(uint32 networkId)
 {
+	OutputMemoryStream packet;
+	ReplicationCommand cmd(ReplicationAction::Update, networkId);
+
+	// --- Fill packet ---
+	write(packet, cmd);
+
+	// --- Send packet ---
+
+
 }
 
 void ReplicationManagerServer::destroy(uint32 networkId)
 {
+	OutputMemoryStream packet;
+	ReplicationCommand cmd(ReplicationAction::Destroy, networkId);
+	
+	// --- Fill packet ---
+	write(packet, cmd);
+
+	// --- Send packet ---
+
+
 }
 
 void ReplicationManagerServer::write(OutputMemoryStream& packet, ReplicationCommand command)
-{
-	packet.Write(command.networkId);
-	packet.Write(command.action);
-
-	switch (command.action)
+{	
+	if (command.action != ReplicationAction::Destroy)
 	{
-	case ReplicationAction::None:
-		break;
-	case ReplicationAction::Create:
-		{
-		GameObject* go = App->modLinkingContext->getNetworkGameObject(netId);
+		packet.Write(command.networkId);
+		packet.Write(command.action);
+
+		GameObject* go = App->modLinkingContext->getNetworkGameObject(command.networkId);
 
 		// Serialize go fields
-		}
-		break;
-	case ReplicationAction::Update:
-		{
-		GameObject* go = App->modLinkingContext->getNetworkGameObject(netId);
 
-		// Serialize go fields
-		}
-		break;
-	case ReplicationAction::Destroy:
-		break;
-	default:
-		break;
 	}
 }

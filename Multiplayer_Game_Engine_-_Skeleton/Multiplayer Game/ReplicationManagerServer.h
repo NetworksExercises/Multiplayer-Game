@@ -12,5 +12,4 @@ public:
 
 	void write(OutputMemoryStream &packet, ReplicationCommand action);
 
-	uint32 netId;
 };
