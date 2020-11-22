@@ -52,11 +52,6 @@ void ReplicationManagerServer::write(OutputMemoryStream& packet)
 			packet.Write(go->size.y);
 			packet.Write(go->angle);
 
-			//if (replicationCommand.second.action == ReplicationAction::Update)
-			//{
-			//	//if (go->sprite)
-			//	//	packet.Write(go->sprite.);
-			//}
 		}
 	}
 

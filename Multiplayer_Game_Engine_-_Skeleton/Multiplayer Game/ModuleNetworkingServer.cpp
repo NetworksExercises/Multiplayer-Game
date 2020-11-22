@@ -248,7 +248,9 @@ void ModuleNetworkingServer::onUpdate()
 
 				// TODO(you): World state replication lab session
 
-				if (clientProxy.gameObject && !clientProxy.RepManager_s.replicationCommands.empty())
+				if (clientProxy.gameObject && 
+					!clientProxy.RepManager_s.replicationCommands.empty() &&
+					clientProxy.secondsSinceLastPacket > DISCONNECT_TIMEOUT_SECONDS/2)
 				{
 					OutputMemoryStream packet;
 					packet << PROTOCOL_ID;
