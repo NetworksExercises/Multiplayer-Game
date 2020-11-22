@@ -10,6 +10,8 @@ public:
 	void update(uint32 networkId);
 	void destroy(uint32 networkId);
 
-	void write(OutputMemoryStream &packet, ReplicationCommand action);
+	void write(OutputMemoryStream &packet);
 
+
+	std::unordered_map<uint32, ReplicationCommand> replicationCommands;
 };

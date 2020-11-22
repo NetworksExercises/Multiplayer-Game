@@ -190,7 +190,7 @@ void ModuleNetworkingServer::onPacketReceived(const InputMemoryStream &packet, c
 		}
 		else if (message == ClientMessage::Ping)
 		{
-			LOG("Received ping from client %s", proxy->name.c_str());
+			//LOG("Received ping from client %s", proxy->name.c_str());
 			proxy->secondsSinceLastPacket = 0.0f;
 		}
 
@@ -232,7 +232,7 @@ void ModuleNetworkingServer::onUpdate()
 
 				if (clientProxy.secondsSinceLastPing > PING_INTERVAL_SECONDS)
 				{
-					LOG("Pinging client %s", clientProxy.name.c_str());
+					//LOG("Pinging client %s", clientProxy.name.c_str());
 					clientProxy.secondsSinceLastPing = 0.0f;
 					OutputMemoryStream pingPacket;
 					pingPacket << PROTOCOL_ID;
@@ -248,8 +248,14 @@ void ModuleNetworkingServer::onUpdate()
 
 				// TODO(you): World state replication lab session
 
-				//if(clientProxy.gameObject)
-					//clientProxy.RepManager_s.update(clientProxy.gameObject->networkId);
+				if (clientProxy.gameObject && !clientProxy.RepManager_s.replicationCommands.empty())
+				{
+					OutputMemoryStream packet;
+					packet << PROTOCOL_ID;
+					packet << ServerMessage::Object;
+					clientProxy.RepManager_s.write(packet);
+					sendPacket(packet, clientProxies->address);
+				}
 		
 				// TODO(you): Reliability on top of UDP lab session
 			}

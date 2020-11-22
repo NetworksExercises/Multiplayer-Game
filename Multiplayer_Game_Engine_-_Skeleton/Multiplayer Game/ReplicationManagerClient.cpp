@@ -23,6 +23,13 @@ void ReplicationManagerClient::read(const InputMemoryStream& packet)
 			App->modLinkingContext->registerNetworkGameObjectWithNetworkId(go, network_Id);
 
 			// Deserialize go fields
+			packet.Read(go->id);
+			packet.Read(go->position.x);
+			packet.Read(go->position.y);
+			packet.Read(go->size.x);
+			packet.Read(go->size.y);
+			packet.Read(go->angle);
+
 			}
 			break;
 		case ReplicationAction::Update:
@@ -30,6 +37,13 @@ void ReplicationManagerClient::read(const InputMemoryStream& packet)
 			GameObject* go = App->modLinkingContext->getNetworkGameObject(network_Id);
 
 			// Deserialize go fields
+			packet.Read(go->id);
+			packet.Read(go->position.x);
+			packet.Read(go->position.y);
+			packet.Read(go->size.x);
+			packet.Read(go->size.y);
+			packet.Read(go->angle);
+
 			}
 			break;
 		case ReplicationAction::Destroy:
