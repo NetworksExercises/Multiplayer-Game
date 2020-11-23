@@ -221,6 +221,7 @@ void ModuleNetworkingServer::onUpdate()
 			if (clientProxy.connected)
 			{
 				clientProxy.secondsSinceLastPing += Time.deltaTime;
+				clientProxy.secondsSinceLastReplication += Time.deltaTime;
 
 				// TODO(you): UDP virtual connection lab session
 				if (clientProxy.secondsSinceLastPacket > DISCONNECT_TIMEOUT_SECONDS)
@@ -250,8 +251,9 @@ void ModuleNetworkingServer::onUpdate()
 
 				if (clientProxy.gameObject && 
 					!clientProxy.RepManager_s.replicationCommands.empty() &&
-					clientProxy.secondsSinceLastPacket > DISCONNECT_TIMEOUT_SECONDS/2)
+					clientProxy.secondsSinceLastReplication > 0.032)
 				{
+					clientProxy.secondsSinceLastReplication = 0.0f;
 					OutputMemoryStream packet;
 					packet << PROTOCOL_ID;
 					packet << ServerMessage::Object;

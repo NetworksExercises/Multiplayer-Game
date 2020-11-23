@@ -9,7 +9,6 @@ void ReplicationManagerServer::create(uint32 networkId)
 
 	// --- Fill packet ---
 	//write(packet, cmd);
-	replicationCommands[networkId].networkId = networkId;
 	replicationCommands[networkId].action = ReplicationAction::Create;
 }
 
@@ -19,7 +18,6 @@ void ReplicationManagerServer::update(uint32 networkId)
 
 	// --- Fill packet ---
 	//write(packet, cmd);
-	replicationCommands[networkId].networkId = networkId;
 	replicationCommands[networkId].action = ReplicationAction::Update;
 }
 
@@ -27,7 +25,6 @@ void ReplicationManagerServer::destroy(uint32 networkId)
 {
 	//ReplicationCommand cmd(ReplicationAction::Destroy, networkId);
 	
-	replicationCommands[networkId].networkId = networkId;
 	replicationCommands[networkId].action = ReplicationAction::Destroy;
 	// --- Fill packet ---
 	//write(packet, cmd);
@@ -39,10 +36,10 @@ void ReplicationManagerServer::write(OutputMemoryStream& packet)
 	{
 		if (replicationCommand.second.action != ReplicationAction::Destroy)
 		{
-			packet.Write(replicationCommand.second.networkId);
+			packet.Write(replicationCommand.first); // net id
 			packet.Write(replicationCommand.second.action);
 
-			GameObject* go = App->modLinkingContext->getNetworkGameObject(replicationCommand.second.networkId);
+			GameObject* go = App->modLinkingContext->getNetworkGameObject(replicationCommand.first);
 
 			// Serialize go fields
 			packet.Write(go->id);
@@ -52,6 +49,8 @@ void ReplicationManagerServer::write(OutputMemoryStream& packet)
 			packet.Write(go->size.y);
 			packet.Write(go->angle);
 
+			replicationCommands.erase(replicationCommand.first);
+			break;
 		}
 	}
 

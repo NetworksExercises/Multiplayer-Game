@@ -119,32 +119,7 @@ void ModuleNetworkingClient::onPacketReceived(const InputMemoryStream &packet, c
 			packet >> playerId;
 			packet >> networkId;
 
-			//GameObject* player = App->modLinkingContext->getNetworkGameObject(networkId);
-
-			//if (player)
-			//{
-			//	// Create sprite
-			//	player->sprite = App->modRender->addSprite(player);
-			//	player->sprite->order = 5;
-			//	if (spaceshipType == 0) {
-			//		player->sprite->texture = App->modResources->spacecraft1;
-			//	}
-			//	else if (spaceshipType == 1) {
-			//		player->sprite->texture = App->modResources->spacecraft2;
-			//	}
-			//	else {
-			//		player->sprite->texture = App->modResources->spacecraft3;
-			//	}
-
-			//	// Create collider
-			//	player->collider = App->modCollision->addCollider(ColliderType::Player, player);
-			//	player->collider->isTrigger = true; // NOTE(jesus): This object will receive onCollisionTriggered events
-
-			//	// Create behaviour
-			//	Spaceship* spaceshipBehaviour = App->modBehaviour->addSpaceship(player);
-			//	player->behaviour = spaceshipBehaviour;
-			//	player->behaviour->isServer = false;
-			//}
+	
 
 			LOG("ModuleNetworkingClient::onPacketReceived() - Welcome from server");
 			state = ClientState::Connected;
@@ -158,8 +133,38 @@ void ModuleNetworkingClient::onPacketReceived(const InputMemoryStream &packet, c
 	else if (state == ClientState::Connected)
 	{
 		// TODO(you): World state replication lab session
-		if(message == ServerMessage::Object)
+		if (message == ServerMessage::Object)
+		{
 			RepManager_c.read(packet);
+
+			GameObject* player = App->modLinkingContext->getNetworkGameObject(networkId);
+
+			if (player && player->state == GameObject::INSTANTIATE)
+			{
+				// Create sprite
+				player->sprite = App->modRender->addSprite(player);
+				player->sprite->order = 5;
+				if (spaceshipType == 0) {
+					player->sprite->texture = App->modResources->spacecraft1;
+				}
+				else if (spaceshipType == 1) {
+					player->sprite->texture = App->modResources->spacecraft2;
+				}
+				else {
+					player->sprite->texture = App->modResources->spacecraft3;
+				}
+		
+				// Create collider
+				player->collider = App->modCollision->addCollider(ColliderType::Player, player);
+				player->collider->isTrigger = true; // NOTE(jesus): This object will receive onCollisionTriggered events
+		
+				// Create behaviour
+				Spaceship* spaceshipBehaviour = App->modBehaviour->addSpaceship(player);
+				player->behaviour = spaceshipBehaviour;
+				player->behaviour->isServer = false;
+			}
+
+		}
 
 		// TODO(you): Reliability on top of UDP lab session
 	}
