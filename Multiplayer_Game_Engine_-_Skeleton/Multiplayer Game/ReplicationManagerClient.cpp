@@ -71,7 +71,7 @@ void ReplicationManagerClient::read(const InputMemoryStream& packet)
 
 			ColliderType type = ColliderType::None;
 			packet.Read(type);
-			if (go->collider == nullptr) 
+			if (go->collider == nullptr && type != ColliderType::None) 
 				go->collider = App->modCollision->addCollider(type, go);
 			if (go->collider != nullptr)
 				packet.Read(go->collider->isTrigger);
@@ -112,13 +112,19 @@ void ReplicationManagerClient::read(const InputMemoryStream& packet)
 			GameObject* go = App->modLinkingContext->getNetworkGameObject(network_Id);
 
 			// Deserialize go fields
-			//packet.Read(go->id);
 			packet.Read(go->position.x);
 			packet.Read(go->position.y);
 			packet.Read(go->size.x);
 			packet.Read(go->size.y);
 			packet.Read(go->angle);
 
+			// Collider
+			ColliderType type = ColliderType::None;
+			packet.Read(type);
+			if (go->collider == nullptr && type != ColliderType::None)
+				go->collider = App->modCollision->addCollider(type, go);
+			if (go->collider != nullptr)
+				packet.Read(go->collider->isTrigger);
 			}
 			break;
 		case ReplicationAction::Destroy:

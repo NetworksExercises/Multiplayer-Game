@@ -34,10 +34,11 @@ void ReplicationManagerServer::write(OutputMemoryStream& packet)
 {	
 	for (std::unordered_map<uint32, ReplicationCommand>::const_reference& replicationCommand : replicationCommands)
 	{
-		if (replicationCommand.second.action != ReplicationAction::Destroy)
+		packet.Write(replicationCommand.first); // net id
+		packet.Write(replicationCommand.second.action);
+
+		if (replicationCommand.second.action == ReplicationAction::Create)
 		{
-			packet.Write(replicationCommand.first); // net id
-			packet.Write(replicationCommand.second.action);
 
 			GameObject* go = App->modLinkingContext->getNetworkGameObject(replicationCommand.first);
 
@@ -76,7 +77,28 @@ void ReplicationManagerServer::write(OutputMemoryStream& packet)
 			replicationCommands.erase(replicationCommand.first);
 			break;
 		}
+		else if (replicationCommand.second.action == ReplicationAction::Update)
+		{
+			packet.Write(replicationCommand.first); // net id
+			packet.Write(replicationCommand.second.action);
+
+			GameObject* go = App->modLinkingContext->getNetworkGameObject(replicationCommand.first);
+
+			// Serialize go fields
+			packet.Write(go->position.x);
+			packet.Write(go->position.y);
+			packet.Write(go->size.x);
+			packet.Write(go->size.y);
+			packet.Write(go->angle);
+
+			// Collider 
+			ColliderType colliderType = go->collider != nullptr ? go->collider->type : ColliderType::None;
+			packet.Write(colliderType);
+
+			if (go->collider)
+				packet.Write(go->collider->isTrigger);
+		}
 	}
 
-	replicationCommands.clear();
+	//replicationCommands.clear();
 }
