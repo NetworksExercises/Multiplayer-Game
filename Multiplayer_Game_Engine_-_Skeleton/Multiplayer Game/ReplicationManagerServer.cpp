@@ -42,13 +42,37 @@ void ReplicationManagerServer::write(OutputMemoryStream& packet)
 			GameObject* go = App->modLinkingContext->getNetworkGameObject(replicationCommand.first);
 
 			// Serialize go fields
-			packet.Write(go->id);
+			//packet.Write(go->id);
 			packet.Write(go->position.x);
 			packet.Write(go->position.y);
 			packet.Write(go->size.x);
 			packet.Write(go->size.y);
 			packet.Write(go->angle);
 
+			std::string texture = "";
+
+			// sprite 
+			if (go->sprite)
+			{
+				texture = go->sprite->texture != nullptr ? go->sprite->texture->filename : "";
+				packet.Write(texture);
+				packet.Write(go->sprite->order);
+			}
+			else
+			{
+				packet.Write(texture);
+				packet.Write(0);
+			}
+
+			// Collider 
+			ColliderType colliderType = go->collider != nullptr ? go->collider->type : ColliderType::None;
+			packet.Write(colliderType);
+
+			if (go->collider)
+				packet.Write(go->collider->isTrigger);
+			
+			packet.Write(go->tag);
+			
 			replicationCommands.erase(replicationCommand.first);
 			break;
 		}
