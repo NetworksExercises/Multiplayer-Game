@@ -79,9 +79,6 @@ void ReplicationManagerServer::write(OutputMemoryStream& packet)
 		}
 		else if (replicationCommand.second.action == ReplicationAction::Update)
 		{
-			packet.Write(replicationCommand.first); // net id
-			packet.Write(replicationCommand.second.action);
-
 			GameObject* go = App->modLinkingContext->getNetworkGameObject(replicationCommand.first);
 
 			// Serialize go fields
@@ -91,12 +88,12 @@ void ReplicationManagerServer::write(OutputMemoryStream& packet)
 			packet.Write(go->size.y);
 			packet.Write(go->angle);
 
-			// Collider 
-			ColliderType colliderType = go->collider != nullptr ? go->collider->type : ColliderType::None;
-			packet.Write(colliderType);
+			//// Collider 
+			//ColliderType colliderType = go->collider != nullptr ? go->collider->type : ColliderType::None;
+			//packet.Write(colliderType);
 
-			if (go->collider)
-				packet.Write(go->collider->isTrigger);
+			//if (go->collider)
+			//	packet.Write(go->collider->isTrigger);
 		}
 
 		replicationCommands.erase(replicationCommand.first);

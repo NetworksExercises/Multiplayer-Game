@@ -258,7 +258,7 @@ void ModuleNetworkingServer::onUpdate()
 					packet << PROTOCOL_ID;
 					packet << ServerMessage::Object;
 					clientProxy.RepManager_s.write(packet);
-					sendPacket(packet, clientProxies->address);
+					sendPacket(packet, clientProxy.address);
 				}
 		
 				// TODO(you): Reliability on top of UDP lab session

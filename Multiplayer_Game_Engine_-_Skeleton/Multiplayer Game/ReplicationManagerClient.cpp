@@ -118,13 +118,13 @@ void ReplicationManagerClient::read(const InputMemoryStream& packet)
 			packet.Read(go->size.y);
 			packet.Read(go->angle);
 
-			// Collider
-			ColliderType type = ColliderType::None;
-			packet.Read(type);
-			if (go->collider == nullptr && type != ColliderType::None)
-				go->collider = App->modCollision->addCollider(type, go);
-			if (go->collider != nullptr)
-				packet.Read(go->collider->isTrigger);
+			//// Collider
+			//ColliderType type = ColliderType::None;
+			//packet.Read(type);
+			//if (go->collider == nullptr && type != ColliderType::None)
+			//	go->collider = App->modCollision->addCollider(type, go);
+			//if (go->collider != nullptr)
+			//	packet.Read(go->collider->isTrigger);
 			}
 			break;
 		case ReplicationAction::Destroy:
