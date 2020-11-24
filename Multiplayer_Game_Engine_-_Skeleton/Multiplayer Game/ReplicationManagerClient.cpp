@@ -68,7 +68,12 @@ void ReplicationManagerClient::read(const InputMemoryStream& packet)
 							go->sprite->texture = App->modResources->laser;
 
 						else if (texture == "explosion1.png")
+						{
 							go->sprite->texture = App->modResources->explosion1;
+							go->animation = App->modRender->addAnimation(go);
+							go->animation->clip = App->modResources->explosionClip;
+							App->modSound->playAudioClip(App->modResources->audioClipExplosion);
+						}
 
 					}
 				}
@@ -147,6 +152,16 @@ void ReplicationManagerClient::read(const InputMemoryStream& packet)
 			ASSERT(go != nullptr);
 			App->modLinkingContext->unregisterNetworkGameObject(go);
 			App->modGameObject->Destroy(go);
+			
+			//if (go->sprite)
+			//	App->modRender->removeSprite(go);
+
+			//if (go->animation)
+			//	App->modRender->removeAnimation(go);		
+
+			//if (go->collider)
+			//	App->modCollision->removeCollider(go->collider);
+					
 			}
 			break;
 		default:

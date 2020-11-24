@@ -75,6 +75,7 @@ void ReplicationManagerServer::write(OutputMemoryStream& packet)
 
 			if (go->collider)
 				packet.Write(go->collider->isTrigger);
+
 			
 			packet.Write(go->tag);
 			//replicationCommands.erase(replicationCommand.first);
@@ -92,7 +93,9 @@ void ReplicationManagerServer::write(OutputMemoryStream& packet)
 			packet.Write(go->size.y);
 			packet.Write(go->angle);
 
-			go->behaviour->write(packet);
+			if(go->behaviour)
+				go->behaviour->write(packet);
+
 		}
 
 		replicationCommands.erase(replicationCommand.first);
