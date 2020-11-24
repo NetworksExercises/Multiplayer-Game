@@ -73,9 +73,9 @@ void ReplicationManagerServer::write(OutputMemoryStream& packet)
 				packet.Write(go->collider->isTrigger);
 			
 			packet.Write(go->tag);
-			
-			replicationCommands.erase(replicationCommand.first);
-			break;
+			//replicationCommands.erase(replicationCommand.first);
+
+			//break;
 		}
 		else if (replicationCommand.second.action == ReplicationAction::Update)
 		{
@@ -98,6 +98,10 @@ void ReplicationManagerServer::write(OutputMemoryStream& packet)
 			if (go->collider)
 				packet.Write(go->collider->isTrigger);
 		}
+
+		replicationCommands.erase(replicationCommand.first);
+		break;
+		// TODO: do we need the for?
 	}
 
 	//replicationCommands.clear();

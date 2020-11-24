@@ -130,6 +130,8 @@ void ReplicationManagerClient::read(const InputMemoryStream& packet)
 		case ReplicationAction::Destroy:
 			{
 			GameObject* go = App->modLinkingContext->getNetworkGameObject(network_Id);
+
+			ASSERT(go != nullptr);
 			App->modLinkingContext->unregisterNetworkGameObject(go);
 			App->modGameObject->Destroy(go);
 			}
