@@ -23,8 +23,6 @@ void Laser::update()
 		//const float neutralTimeSeconds = 0.1f;
 		//if (secondsSinceCreation > neutralTimeSeconds && gameObject->collider == nullptr) {
 		//	//gameObject->collider = App->modCollision->addCollider(ColliderType::Laser, gameObject);
-		//	//gameObject->collider->isTrigger = true;
-		//	//NetworkUpdate(gameObject);
 		//}
 
 		const float lifetimeSeconds = 2.0f;

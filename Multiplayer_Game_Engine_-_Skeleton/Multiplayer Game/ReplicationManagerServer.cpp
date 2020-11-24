@@ -18,7 +18,11 @@ void ReplicationManagerServer::update(uint32 networkId)
 
 	// --- Fill packet ---
 	//write(packet, cmd);
-	replicationCommands[networkId].action = ReplicationAction::Update;
+	if (replicationCommands[networkId].action != ReplicationAction::Create
+		&& replicationCommands[networkId].action != ReplicationAction::Destroy)
+	{
+		replicationCommands[networkId].action = ReplicationAction::Update;
+	}
 }
 
 void ReplicationManagerServer::destroy(uint32 networkId)
@@ -87,13 +91,6 @@ void ReplicationManagerServer::write(OutputMemoryStream& packet)
 			packet.Write(go->size.x);
 			packet.Write(go->size.y);
 			packet.Write(go->angle);
-
-			//// Collider 
-			//ColliderType colliderType = go->collider != nullptr ? go->collider->type : ColliderType::None;
-			//packet.Write(colliderType);
-
-			//if (go->collider)
-			//	packet.Write(go->collider->isTrigger);
 		}
 
 		replicationCommands.erase(replicationCommand.first);
@@ -101,5 +98,4 @@ void ReplicationManagerServer::write(OutputMemoryStream& packet)
 		// TODO: do we need the for?
 	}
 
-	//replicationCommands.clear();
 }

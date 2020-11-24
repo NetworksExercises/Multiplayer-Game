@@ -146,7 +146,10 @@ void ModuleNetworkingServer::onPacketReceived(const InputMemoryStream &packet, c
 					GameObject *gameObject = networkGameObjects[i];
 					
 					// TODO(you): World state replication lab session
-					proxy->RepManager_s.create(gameObject->networkId);
+					if (proxy->gameObject != gameObject)
+					{
+						proxy->RepManager_s.create(gameObject->networkId);
+					}
 				}
 
 				LOG("Message received: hello - from player %s", proxy->name.c_str());
@@ -402,7 +405,7 @@ GameObject * ModuleNetworkingServer::instantiateNetworkObject()
 		if (clientProxies[i].connected)
 		{
 			// TODO(you): World state replication lab session
-			clientProxies->RepManager_s.create(gameObject->networkId);
+			clientProxies[i].RepManager_s.create(gameObject->networkId);
 		}
 	}
 
@@ -417,7 +420,7 @@ void ModuleNetworkingServer::updateNetworkObject(GameObject * gameObject)
 		if (clientProxies[i].connected)
 		{
 			// TODO(you): World state replication lab session
-			clientProxies->RepManager_s.update(gameObject->networkId);
+			clientProxies[i].RepManager_s.update(gameObject->networkId);
 		}
 	}
 }
@@ -430,7 +433,7 @@ void ModuleNetworkingServer::destroyNetworkObject(GameObject * gameObject)
 		if (clientProxies[i].connected)
 		{
 			// TODO(you): World state replication lab session
-			clientProxies->RepManager_s.destroy(gameObject->networkId);
+			clientProxies[i].RepManager_s.destroy(gameObject->networkId);
 		}
 	}
 
