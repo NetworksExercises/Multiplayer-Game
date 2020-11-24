@@ -84,12 +84,12 @@ void ReplicationManagerClient::read(const InputMemoryStream& packet)
 				{
 					case ColliderType::Player: 
 					{
-						go->behaviour = new Spaceship;		
+						go->behaviour = App->modBehaviour->addSpaceship(go);;
 						break;
 					}
 					case ColliderType::Laser: 
 					{
-						go->behaviour = new Laser;
+						go->behaviour = App->modBehaviour->addLaser(go);
 						break;
 					}
 					default: 
@@ -98,10 +98,10 @@ void ReplicationManagerClient::read(const InputMemoryStream& packet)
 					}
 				}
 
-				if (go->behaviour != nullptr)
-				{
-					go->behaviour->gameObject = go;
-				}
+				//if (go->behaviour != nullptr)
+				//{
+				//	go->behaviour->gameObject = go;
+				//}
 			}
 
 			packet.Read(go->tag);
