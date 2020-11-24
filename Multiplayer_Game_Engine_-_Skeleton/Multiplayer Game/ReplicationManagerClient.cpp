@@ -67,6 +67,9 @@ void ReplicationManagerClient::read(const InputMemoryStream& packet)
 						else if (texture == "laser.png")
 							go->sprite->texture = App->modResources->laser;
 
+						else if (texture == "explosion1.png")
+							go->sprite->texture = App->modResources->explosion1;
+
 					}
 				}
 
@@ -80,6 +83,18 @@ void ReplicationManagerClient::read(const InputMemoryStream& packet)
 					go->collider = App->modCollision->addCollider(type, go);
 				if (go->collider != nullptr)
 					packet.Read(go->collider->isTrigger);
+
+				if (type == ColliderType::None)
+				{
+					ASSERT(go->sprite->texture != nullptr);
+
+					if (go->sprite->texture->filename == "laser.png")
+						type = ColliderType::Laser;
+					else if (go->sprite->texture->filename == "spacecraft1.png"
+						|| go->sprite->texture->filename == "spacecraft2.png"
+						|| go->sprite->texture->filename == "spacecraft3.png")
+						type = ColliderType::Player;
+				}
 
 				// Behaviour
 
@@ -102,11 +117,6 @@ void ReplicationManagerClient::read(const InputMemoryStream& packet)
 						break;
 					}
 					}
-
-					//if (go->behaviour != nullptr)
-					//{
-					//	go->behaviour->gameObject = go;
-					//}
 				}
 
 				packet.Read(go->tag);
@@ -124,6 +134,10 @@ void ReplicationManagerClient::read(const InputMemoryStream& packet)
 			packet.Read(go->size.x);
 			packet.Read(go->size.y);
 			packet.Read(go->angle);	
+
+		
+			go->behaviour->read(packet);
+
 			}
 			break;
 		case ReplicationAction::Destroy:

@@ -91,6 +91,8 @@ void ReplicationManagerServer::write(OutputMemoryStream& packet)
 			packet.Write(go->size.x);
 			packet.Write(go->size.y);
 			packet.Write(go->angle);
+
+			go->behaviour->write(packet);
 		}
 
 		replicationCommands.erase(replicationCommand.first);

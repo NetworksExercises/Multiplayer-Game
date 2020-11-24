@@ -19,11 +19,10 @@ void Laser::update()
 
 	if (isServer)
 	{
-		// REMOVAL: neutral time seconds
-		//const float neutralTimeSeconds = 0.1f;
-		//if (secondsSinceCreation > neutralTimeSeconds && gameObject->collider == nullptr) {
-		//	//gameObject->collider = App->modCollision->addCollider(ColliderType::Laser, gameObject);
-		//}
+		const float neutralTimeSeconds = 0.1f;
+		if (secondsSinceCreation > neutralTimeSeconds && gameObject->collider == nullptr) {
+			gameObject->collider = App->modCollision->addCollider(ColliderType::Laser, gameObject);
+		}
 
 		const float lifetimeSeconds = 2.0f;
 		if (secondsSinceCreation >= lifetimeSeconds) {
@@ -85,9 +84,6 @@ void Spaceship::onInput(const InputController &input)
 			laserBehaviour->isServer = isServer;
 
 			laser->tag = gameObject->tag;
-
-			// ADDITION: Create collider 
-			laser->collider = App->modCollision->addCollider(ColliderType::Laser, gameObject);
 		}
 	}
 }
