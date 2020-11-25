@@ -252,8 +252,7 @@ void ModuleNetworkingServer::onUpdate()
 
 				// TODO(you): World state replication lab session
 
-				if (clientProxy.gameObject && 
-					!clientProxy.RepManager_s.replicationCommands.empty() &&
+				if ( !clientProxy.RepManager_s.replicationCommands.empty() &&
 					clientProxy.secondsSinceLastReplication > 0.032)
 				{
 					clientProxy.secondsSinceLastReplication = 0.0f;

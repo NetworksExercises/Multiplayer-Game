@@ -18,6 +18,15 @@ void ModuleNetworkingClient::setPlayerInfo(const char * pPlayerName, uint8 pSpac
 	spaceshipType = pSpaceshipType;
 }
 
+uint32 ModuleNetworkingClient::GetNetworkID()
+{
+	return networkId;
+}
+
+void ModuleNetworkingClient::SetPlayerKilledState(bool killed)
+{
+	player_killed = killed;
+}
 
 
 //////////////////////////////////////////////////////////////////////
@@ -239,13 +248,15 @@ void ModuleNetworkingClient::onUpdate()
 		else
 		{
 			// This means that the player has been destroyed (e.g. killed)
-
+			if (player_killed)
+				onConnectionReset(serverAddress);
 		}
 	}
 }
 
 void ModuleNetworkingClient::onConnectionReset(const sockaddr_in & fromAddress)
 {
+	player_killed = false;
 	disconnect();
 }
 

@@ -133,15 +133,20 @@ void ReplicationManagerClient::read(const InputMemoryStream& packet)
 			{
 			GameObject* go = App->modLinkingContext->getNetworkGameObject(network_Id);
 
-			// Deserialize go fields
-			packet.Read(go->position.x);
-			packet.Read(go->position.y);
-			packet.Read(go->size.x);
-			packet.Read(go->size.y);
-			packet.Read(go->angle);	
+			if (go)
+			{
+				// Deserialize go fields
+				packet.Read(go->position.x);
+				packet.Read(go->position.y);
+				packet.Read(go->size.x);
+				packet.Read(go->size.y);
+				packet.Read(go->angle);
 
-		
-			go->behaviour->read(packet);
+
+				go->behaviour->read(packet);
+			}
+			else
+				LOG("Go is null in replication manager update");
 
 			}
 			break;
@@ -152,6 +157,9 @@ void ReplicationManagerClient::read(const InputMemoryStream& packet)
 			ASSERT(go != nullptr);
 			App->modLinkingContext->unregisterNetworkGameObject(go);
 			App->modGameObject->Destroy(go);
+
+			if (network_Id == App->modNetClient->GetNetworkID())
+				App->modNetClient->SetPlayerKilledState(true);
 			
 			//if (go->sprite)
 			//	App->modRender->removeSprite(go);

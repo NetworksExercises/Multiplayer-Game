@@ -14,7 +14,9 @@ public:
 
 	void setPlayerInfo(const char *playerName, uint8 spaceshipType);
 
+	uint32 GetNetworkID();
 
+	void SetPlayerKilledState(bool killed);
 
 private:
 
@@ -61,6 +63,7 @@ private:
 	uint32 playerId = 0;
 	uint32 networkId = 0;
 
+	bool player_killed = false;
 
 	// Connecting stage
 
