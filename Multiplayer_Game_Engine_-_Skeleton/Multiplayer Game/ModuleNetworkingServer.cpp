@@ -169,13 +169,14 @@ void ModuleNetworkingServer::onPacketReceived(const InputMemoryStream &packet, c
 			// Process the input packet and update the corresponding game object
 			if (proxy != nullptr && IsValid(proxy->gameObject))
 			{
-				// TODO(you): Reliability on top of UDP lab session
+				uint32 sequenceNumber = 0;
 
 				// Read input data
 				while (packet.RemainingByteCount() > 0)
 				{
 					InputPacketData inputData;
 					packet >> inputData.sequenceNumber;
+					sequenceNumber = inputData.sequenceNumber;
 					packet >> inputData.horizontalAxis;
 					packet >> inputData.verticalAxis;
 					packet >> inputData.buttonBits;
@@ -189,6 +190,13 @@ void ModuleNetworkingServer::onPacketReceived(const InputMemoryStream &packet, c
 						proxy->nextExpectedInputSequenceNumber = inputData.sequenceNumber + 1;
 					}
 				}
+
+				// TODO(you): Reliability on top of UDP lab session
+				OutputMemoryStream inputACK;
+				inputACK << PROTOCOL_ID;
+				inputACK << ServerMessage::Input;
+				inputACK << sequenceNumber;
+				sendPacket(inputACK, fromAddress);		
 			}
 		}
 		else if (message == ClientMessage::Ping)

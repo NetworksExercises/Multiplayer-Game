@@ -148,6 +148,13 @@ void ModuleNetworkingClient::onPacketReceived(const InputMemoryStream &packet, c
 		}
 
 		// TODO(you): Reliability on top of UDP lab session
+
+		if (message == ServerMessage::Input)
+		{
+			uint32 sequenceNumber;
+			packet >> sequenceNumber;
+			inputDataFront = sequenceNumber + 1;
+		}
 	}
 }
 
@@ -232,7 +239,7 @@ void ModuleNetworkingClient::onUpdate()
 			}
 
 			// Clear the queue
-			inputDataFront = inputDataBack;
+			//inputDataFront = inputDataBack;
 
 			sendPacket(packet, serverAddress);
 		}
