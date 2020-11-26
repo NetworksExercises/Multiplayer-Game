@@ -261,7 +261,7 @@ void ModuleNetworkingServer::onUpdate()
 				// TODO(you): World state replication lab session
 
 				if ( !clientProxy.RepManager_s.replicationCommands.empty() &&
-					clientProxy.secondsSinceLastReplication > 0.032)
+					clientProxy.secondsSinceLastReplication > REPLICATION_INTERVAL_SECONDS)
 				{
 					clientProxy.secondsSinceLastReplication = 0.0f;
 					OutputMemoryStream packet;
