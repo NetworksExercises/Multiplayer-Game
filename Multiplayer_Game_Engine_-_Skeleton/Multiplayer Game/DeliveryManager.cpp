@@ -27,7 +27,8 @@ bool DeliveryManager::processSequenceNumber(const InputMemoryStream& packet)
 
 	if (received_seqNumber >= expected_seqNumber)
 	{
-		pending_ACK.push_back(expected_seqNumber++);
+		pending_ACK.push_back(received_seqNumber);
+		expected_seqNumber = received_seqNumber + 1;
 		return true;
 	}
 
@@ -70,8 +71,8 @@ void DeliveryManager::processAckdSequenceNumbers(const InputMemoryStream& packet
 		}
 		else if (delivery->sequenceNumber < seqNumber)
 		{
-			delivery->delegate->onDeliveryFailure(this);
 			pending_Deliveries.erase(pending_Deliveries.begin());
+			delivery->delegate->onDeliveryFailure(this);
 			delete delivery;
 		}
 		else
@@ -105,8 +106,9 @@ void DeliveryManager::clear()
 {
 	while (!pending_Deliveries.empty())
 	{
+		Delivery* delivery = pending_Deliveries.front();
 		pending_Deliveries.erase(pending_Deliveries.begin());
-		delete pending_Deliveries.front();
+		delete delivery;
 	}
 
 	pending_Deliveries.clear();

@@ -24,7 +24,6 @@ void ReplicationManagerClient::read(const InputMemoryStream& packet)
 			if (go == nullptr)
 			{
 				go = App->modGameObject->Instantiate();
-				//GameObject* go = App->modGameObject->Instantiate();
 				App->modLinkingContext->registerNetworkGameObjectWithNetworkId(go, network_Id);
 
 				// Deserialize go fields
@@ -154,21 +153,14 @@ void ReplicationManagerClient::read(const InputMemoryStream& packet)
 			{
 			GameObject* go = App->modLinkingContext->getNetworkGameObject(network_Id);
 
-			ASSERT(go != nullptr);
-			App->modLinkingContext->unregisterNetworkGameObject(go);
-			App->modGameObject->Destroy(go);
+			if (go)
+			{
+				App->modLinkingContext->unregisterNetworkGameObject(go);
+				App->modGameObject->Destroy(go);
 
-			if (network_Id == App->modNetClient->GetNetworkID())
-				App->modNetClient->SetPlayerKilledState(true);
-			
-			//if (go->sprite)
-			//	App->modRender->removeSprite(go);
-
-			//if (go->animation)
-			//	App->modRender->removeAnimation(go);		
-
-			//if (go->collider)
-			//	App->modCollision->removeCollider(go->collider);
+				if (network_Id == App->modNetClient->GetNetworkID())
+					App->modNetClient->SetPlayerKilledState(true);
+			}
 					
 			}
 			break;

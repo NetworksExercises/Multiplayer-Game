@@ -204,6 +204,13 @@ void ModuleNetworkingServer::onPacketReceived(const InputMemoryStream &packet, c
 			//LOG("Received ping from client %s", proxy->name.c_str());
 			proxy->secondsSinceLastPacket = 0.0f;
 		}
+		else if (message == ClientMessage::ACK)
+		{
+			if(proxy)
+			{
+				proxy->deliveryManager.processAckdSequenceNumbers(packet);
+			}
+		}
 
 		// TODO(you): UDP virtual connection lab session
 	}
@@ -231,6 +238,9 @@ void ModuleNetworkingServer::onUpdate()
 		{
 			if (clientProxy.connected)
 			{
+				// TODO(you): Reliability on top of UDP lab session
+				clientProxy.deliveryManager.processTimeOutPackets();
+
 				clientProxy.secondsSinceLastPing += Time.deltaTime;
 				clientProxy.secondsSinceLastReplication += Time.deltaTime;
 
@@ -263,12 +273,18 @@ void ModuleNetworkingServer::onUpdate()
 				if ( !clientProxy.RepManager_s.replicationCommands.empty() &&
 					clientProxy.secondsSinceLastReplication > REPLICATION_INTERVAL_SECONDS)
 				{
-					clientProxy.secondsSinceLastReplication = 0.0f;
-					OutputMemoryStream packet;
-					packet << PROTOCOL_ID;
-					packet << ServerMessage::Object;
-					clientProxy.RepManager_s.write(packet);
-					sendPacket(packet, clientProxy.address);
+					while (!clientProxy.RepManager_s.replicationCommands.empty())
+					{
+						clientProxy.secondsSinceLastReplication = 0.0f;
+						OutputMemoryStream packet;
+						packet << PROTOCOL_ID;
+						packet << ServerMessage::Object;
+						Delivery* delivery = clientProxy.deliveryManager.writeSequenceNumber(packet);
+						ReplicationManagerDeliveryDelegate* deliveryDelegate = new ReplicationManagerDeliveryDelegate(&clientProxy.RepManager_s);
+						delivery->delegate = deliveryDelegate;
+						clientProxy.RepManager_s.write(packet, deliveryDelegate);
+						sendPacket(packet, clientProxy.address);
+					}
 				}
 		
 				// TODO(you): Reliability on top of UDP lab session

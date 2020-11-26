@@ -144,7 +144,21 @@ void ModuleNetworkingClient::onPacketReceived(const InputMemoryStream &packet, c
 		// TODO(you): World state replication lab session
 		if (message == ServerMessage::Object)
 		{
-			RepManager_c.read(packet);
+			if (deliveryManager.processSequenceNumber(packet))
+			{
+				RepManager_c.read(packet);
+
+
+				// TODO(you): Reliability on top of UDP lab session
+				if (deliveryManager.hasSequenceNumbersPendingAck())
+				{
+					OutputMemoryStream ack_packet;
+					ack_packet << PROTOCOL_ID;
+					ack_packet << ClientMessage::ACK;
+					deliveryManager.writeSequenceNumbersPendingAck(ack_packet);
+					sendPacket(ack_packet, fromAddress);
+				}
+			}
 		}
 
 		// TODO(you): Reliability on top of UDP lab session

@@ -48,7 +48,7 @@ private:
 		sockaddr_in address;
 		uint32 clientId;
 		std::string name;
-		GameObject *gameObject = nullptr;
+		GameObject* gameObject = nullptr;
 
 		// TODO(you): UDP virtual connection lab session
 		float secondsSinceLastPacket = 0.0f;

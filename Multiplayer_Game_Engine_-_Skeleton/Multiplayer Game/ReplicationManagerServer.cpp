@@ -6,6 +6,7 @@
 void ReplicationManagerServer::create(uint32 networkId)
 {
 	replicationCommands[networkId].action = ReplicationAction::Create;
+	replicationCommands[networkId].networkId = networkId;
 }
 
 void ReplicationManagerServer::update(uint32 networkId)
@@ -14,17 +15,19 @@ void ReplicationManagerServer::update(uint32 networkId)
 		&& replicationCommands[networkId].action != ReplicationAction::Destroy)
 	{
 		replicationCommands[networkId].action = ReplicationAction::Update;
+		replicationCommands[networkId].networkId = networkId;
 	}
 }
 
 void ReplicationManagerServer::destroy(uint32 networkId)
 {
 	replicationCommands[networkId].action = ReplicationAction::Destroy;
+	replicationCommands[networkId].networkId = networkId;
 }
 
-void ReplicationManagerServer::write(OutputMemoryStream& packet)
+void ReplicationManagerServer::write(OutputMemoryStream& packet, ReplicationManagerDeliveryDelegate* deliveryDelegate)
 {	
-	for (std::unordered_map<uint32, ReplicationCommand>::const_reference& replicationCommand : replicationCommands)
+	for (std::unordered_map<uint32, ReplicationCommand>::reference& replicationCommand : replicationCommands)
 	{
 		packet.Write(replicationCommand.first); // net id
 		packet.Write(replicationCommand.second.action);
@@ -81,10 +84,81 @@ void ReplicationManagerServer::write(OutputMemoryStream& packet)
 				go->behaviour->write(packet);
 
 		}
+		else if (replicationCommand.second.action == ReplicationAction::Destroy)
+		{
+			int i = 1;
+			i++;
+		}
 
+
+		deliveryDelegate->AddCommand(replicationCommand.second);
+		//replicationCommand.second.action = ReplicationAction::None;
 		replicationCommands.erase(replicationCommand.first);
 		break;
 		// TODO: do we need the for?
 	}
 
+}
+
+ReplicationManagerDeliveryDelegate::ReplicationManagerDeliveryDelegate(ReplicationManagerServer* repManager_s)
+{
+	this->RepManager_s = repManager_s;
+}
+
+ReplicationManagerDeliveryDelegate::~ReplicationManagerDeliveryDelegate()
+{
+}
+
+void ReplicationManagerDeliveryDelegate::onDeliverySuccess(DeliveryManager* deliveryManager)
+{
+	//for (const ReplicationCommand& replicationCommand : replicationCommands) 
+	//{
+	//	if()
+	//}
+}
+
+void ReplicationManagerDeliveryDelegate::onDeliveryFailure(DeliveryManager* deliveryManager)
+{
+	for (const ReplicationCommand& replicationCommand : replicationCommands) 
+	{
+		switch (replicationCommand.action)
+		{
+		case ReplicationAction::Create:
+		{
+			if (App->modLinkingContext->getNetworkGameObject(replicationCommand.networkId) != nullptr)
+			{
+				RepManager_s->create(replicationCommand.networkId);
+			}
+			break;
+		}
+
+		case ReplicationAction::Update:
+		{
+			if (App->modLinkingContext->getNetworkGameObject(replicationCommand.networkId) != nullptr)
+			{
+				RepManager_s->update(replicationCommand.networkId);
+			}
+			break;
+		}
+
+		case ReplicationAction::Destroy:
+		{
+			if (App->modLinkingContext->getNetworkGameObject(replicationCommand.networkId) == nullptr)
+			{
+				RepManager_s->destroy(replicationCommand.networkId);
+			}
+			break;
+		}
+
+		default:
+		{
+			break;
+		}
+		}
+	}
+}
+
+void ReplicationManagerDeliveryDelegate::AddCommand(const ReplicationCommand& replicationCommand)
+{
+	replicationCommands.push_back(replicationCommand);
 }
