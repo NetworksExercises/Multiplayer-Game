@@ -75,6 +75,11 @@ uint16 ModuleLinkingContext::getNetworkGameObjectsCount() const
 	return networkGameObjectsCount;
 }
 
+GameObject* ModuleLinkingContext::getNetworkGameObjectAt(uint32 networkId)
+{
+	return networkGameObjects[arrayIndexFromNetworkId(networkId)];
+}
+
 void ModuleLinkingContext::unregisterNetworkGameObject(GameObject *gameObject)
 {
 	ASSERT(gameObject != nullptr);

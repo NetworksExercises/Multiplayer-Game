@@ -14,6 +14,8 @@ public:
 
 	uint16 getNetworkGameObjectsCount() const;
 
+	GameObject* getNetworkGameObjectAt(uint32 networkId);
+
 	void unregisterNetworkGameObject(GameObject * gameObject);
 
 	void clear();

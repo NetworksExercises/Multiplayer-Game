@@ -24,6 +24,16 @@ void ReplicationManagerClient::read(const InputMemoryStream& packet)
 			if (go == nullptr)
 			{
 				go = App->modGameObject->Instantiate();
+
+				GameObject* to_destroy = App->modLinkingContext->getNetworkGameObjectAt(network_Id);
+
+				// --- Server has already destroyed this, but packet did not arrive, force destroy ---
+				if (to_destroy)
+				{
+					App->modLinkingContext->unregisterNetworkGameObject(to_destroy);
+					App->modGameObject->Destroy(to_destroy);
+				}
+
 				App->modLinkingContext->registerNetworkGameObjectWithNetworkId(go, network_Id);
 
 				// Deserialize go fields
