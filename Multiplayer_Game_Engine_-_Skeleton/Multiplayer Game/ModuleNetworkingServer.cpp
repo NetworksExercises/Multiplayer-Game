@@ -273,8 +273,8 @@ void ModuleNetworkingServer::onUpdate()
 				if ( !clientProxy.RepManager_s.replicationCommands.empty() &&
 					clientProxy.secondsSinceLastReplication > REPLICATION_INTERVAL_SECONDS)
 				{
-					while (!clientProxy.RepManager_s.replicationCommands.empty())
-					{
+					//while (!clientProxy.RepManager_s.replicationCommands.empty())
+					//{
 						clientProxy.secondsSinceLastReplication = 0.0f;
 						OutputMemoryStream packet;
 						packet << PROTOCOL_ID;
@@ -284,7 +284,7 @@ void ModuleNetworkingServer::onUpdate()
 						delivery->delegate = deliveryDelegate;
 						clientProxy.RepManager_s.write(packet, deliveryDelegate);
 						sendPacket(packet, clientProxy.address);
-					}
+					//}
 				}
 		
 				// TODO(you): Reliability on top of UDP lab session

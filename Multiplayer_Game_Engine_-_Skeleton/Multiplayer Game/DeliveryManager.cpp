@@ -42,9 +42,11 @@ bool DeliveryManager::hasSequenceNumbersPendingAck() const
 
 void DeliveryManager::writeSequenceNumbersPendingAck(OutputMemoryStream& packet)
 {
-	if (hasSequenceNumbersPendingAck())
+	uint32 size = pending_ACK.size();
+
+	if (size > 0 && hasSequenceNumbersPendingAck())
 	{
-		packet.Write(pending_ACK.size());
+		packet.Write(size);
 		packet.Write(pending_ACK.front());
 		pending_ACK.clear();
 	}
