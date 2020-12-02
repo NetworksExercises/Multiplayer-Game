@@ -93,32 +93,8 @@ void ReplicationManagerServer::write(OutputMemoryStream& packet, ReplicationMana
 			
 			packet.Write(go->tag);
 		}
-		//else if (replicationCommand.second.action == ReplicationAction::Update)
-		//{
-		//	GameObject* go = App->modLinkingContext->getNetworkGameObject(replicationCommand.first);
-
-		//	// Serialize go fields
-		//	packet.Write(go->position.x);
-		//	packet.Write(go->position.y);
-		//	packet.Write(go->size.x);
-		//	packet.Write(go->size.y);
-		//	packet.Write(go->angle);
-
-		//	if(go->behaviour)
-		//		go->behaviour->write(packet);
-
-		//}
-		//else if (replicationCommand.second.action == ReplicationAction::Destroy)
-		//{
-		//	int i = 1;
-		//	i++;
-		//}
-
 
 		deliveryDelegate->AddCommand(replicationCommand.second);
-		//replicationCommand.second.action = ReplicationAction::None;
-		//replicationCommands.erase(replicationCommand.first);
-		//break;
 	}
 
 	replicationCommands.clear();
