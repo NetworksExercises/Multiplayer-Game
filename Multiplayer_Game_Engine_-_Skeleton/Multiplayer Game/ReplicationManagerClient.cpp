@@ -200,5 +200,8 @@ void ReplicationManagerClient::ReadCreateAndUpdateObject(const InputMemoryStream
 		}
 	}
 
+	if(go->behaviour)
+		go->behaviour->read(packet);
+
 	packet.Read(go->tag);
 }

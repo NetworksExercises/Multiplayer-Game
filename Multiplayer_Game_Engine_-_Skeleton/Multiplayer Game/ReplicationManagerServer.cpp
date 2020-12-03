@@ -90,6 +90,8 @@ void ReplicationManagerServer::write(OutputMemoryStream& packet, ReplicationMana
 			if (go->collider)
 				packet.Write(go->collider->isTrigger);
 
+			if (go->behaviour)
+				go->behaviour->write(packet);
 			
 			packet.Write(go->tag);
 		}
