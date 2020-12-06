@@ -105,6 +105,9 @@ void ModuleNetworkingClient::onGui()
 
 			ImGui::Text("Input:");
 			ImGui::InputFloat("Delivery interval (s)", &inputDeliveryIntervalSeconds, 0.01f, 0.1f, 4);
+
+			ImGui::Checkbox("Client prediction", &ClientPrediction);
+
 		}
 	}
 }
@@ -167,7 +170,31 @@ void ModuleNetworkingClient::onPacketReceived(const InputMemoryStream &packet, c
 		{
 			uint32 sequenceNumber;
 			packet >> sequenceNumber;
-			inputDataFront = sequenceNumber + 1;
+			inputDataFront = sequenceNumber;
+			
+
+			if (ClientPrediction)
+			{
+				GameObject* playerGameObject = App->modLinkingContext->getNetworkGameObject(networkId);
+				for (uint32 i = inputDataFront; i < inputDataBack; ++i) 
+				{
+					InputPacketData& inputPacketData = inputData[i % ArrayCount(inputData)];
+					//InputController controller;
+					//controller = inputControllerFromInputPacketData(inputPacketData, controller);
+					//controller.horizontalAxis = inputPacketData.horizontalAxis;
+					//controller.verticalAxis = inputPacketData.verticalAxis;
+					//unpackInputControllerButtons(inputPacketData.buttonBits, controller);
+
+					InputController controller;
+					controller.horizontalAxis = inputPacketData.horizontalAxis;
+					controller.verticalAxis = inputPacketData.verticalAxis;
+					unpackInputControllerButtons(inputPacketData.buttonBits, controller);
+
+					if (playerGameObject) 
+						playerGameObject->behaviour->onInput(controller/*, true*/);
+					
+				}
+			}
 		}
 	}
 }
@@ -228,6 +255,13 @@ void ModuleNetworkingClient::onUpdate()
 			inputPacketData.horizontalAxis = Input.horizontalAxis;
 			inputPacketData.verticalAxis = Input.verticalAxis;
 			inputPacketData.buttonBits = packInputControllerButtons(Input);
+
+			if (ClientPrediction)
+			{
+				GameObject* playerGameObject = App->modLinkingContext->getNetworkGameObject(networkId);
+				if (playerGameObject != nullptr)
+					playerGameObject->behaviour->onInput(Input);
+			}
 		}
 
 		secondsSinceLastInputDelivery += Time.deltaTime;
