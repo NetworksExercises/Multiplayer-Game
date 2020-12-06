@@ -108,6 +108,7 @@ void ModuleNetworkingClient::onGui()
 
 			ImGui::Checkbox("Client prediction", &ClientPrediction);
 
+			ImGui::Checkbox("Entity Interpolation", &EntityInterpolationTriggered);
 		}
 	}
 }
@@ -149,8 +150,9 @@ void ModuleNetworkingClient::onPacketReceived(const InputMemoryStream &packet, c
 		{
 			if (deliveryManager.processSequenceNumber(packet))
 			{
-				RepManager_c.read(packet);
+				EntityInterpolation = EntityInterpolationTriggered;
 
+				RepManager_c.read(packet);
 
 				// TODO(you): Reliability on top of UDP lab session
 				if (deliveryManager.hasSequenceNumbersPendingAck())
@@ -195,6 +197,8 @@ void ModuleNetworkingClient::onPacketReceived(const InputMemoryStream &packet, c
 					
 				}
 			}
+
+			
 		}
 	}
 }
@@ -305,6 +309,13 @@ void ModuleNetworkingClient::onUpdate()
 			// This means that the player has been destroyed (e.g. killed)
 			if (player_killed)
 				onConnectionReset(serverAddress);
+		}
+
+		if (EntityInterpolation)
+		{
+
+			//float& currReplTime = m_replicationTimeBuffer[m_replicationTimeFront % ArrayCount(m_replicationTimeBuffer)];
+			//currReplTime += Time.deltaTime;
 		}
 	}
 }

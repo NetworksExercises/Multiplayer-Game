@@ -77,6 +77,17 @@ void ReplicationManagerClient::read(const InputMemoryStream& packet)
 
 					App->modGameObject->Destroy(go);
 				}
+				else
+				{
+					if (App->modNetClient->IsEntityInterpolationON() && network_Id != App->modNetClient->GetNetworkID())
+					{
+						go->interpolation.secondsElapsed = 0.0f;
+	/*					go->interpolation.finalPosition = go->position;
+						go->interpolation.finalAngle = go->angle;*/
+						go->position = go->interpolation.initialPosition;
+						go->angle = go->interpolation.initialAngle;
+					}
+				}
 
 			}
 			break;
@@ -104,12 +115,20 @@ void ReplicationManagerClient::read(const InputMemoryStream& packet)
 
 void ReplicationManagerClient::ReadCreateAndUpdateObject(const InputMemoryStream& packet, GameObject* go)
 {
+	go->interpolation.initialPosition = go->position;
+	go->interpolation.initialAngle = go->angle;
+
 	// Deserialize go fields
 	packet.Read(go->position.x);
 	packet.Read(go->position.y);
 	packet.Read(go->size.x);
 	packet.Read(go->size.y);
 	packet.Read(go->angle);
+
+
+
+	go->interpolation.finalPosition = go->position;
+	go->interpolation.finalAngle = go->angle;
 
 	std::string texture;
 	packet.Read(texture);

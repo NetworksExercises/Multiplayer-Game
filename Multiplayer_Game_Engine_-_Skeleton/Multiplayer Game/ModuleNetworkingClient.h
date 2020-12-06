@@ -18,6 +18,8 @@ public:
 
 	void SetPlayerKilledState(bool killed);
 
+	bool IsEntityInterpolationON() { return EntityInterpolation; };
+
 private:
 
 	//////////////////////////////////////////////////////////////////////
@@ -114,5 +116,7 @@ private:
 
 	// TODO(you): Latency management lab session
 	bool ClientPrediction = true;
+	bool EntityInterpolation = true;
+	bool EntityInterpolationTriggered = true;
 };
 

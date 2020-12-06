@@ -30,6 +30,29 @@ bool ModuleGameObject::preUpdate()
 
 bool ModuleGameObject::update()
 {
+	if (App->modNetClient->isEnabled() && App->modNetClient->IsEntityInterpolationON())
+	{
+		for (GameObject& go : gameObjects) 
+		{
+			if (go.state == GameObject::UPDATING)
+			{
+				if (go.behaviour && go.networkId != App->modNetClient->GetNetworkID())
+				{
+					float lerpTime = go.interpolation.secondsElapsed / REPLICATION_INTERVAL_SECONDS;
+					
+					if (lerpTime > 1.0f)
+						lerpTime = 1.0f;
+
+					go.position = lerp(go.interpolation.initialPosition, go.interpolation.finalPosition, lerpTime);
+					go.angle = lerp(go.interpolation.initialAngle, go.interpolation.finalAngle, lerpTime);
+
+					go.interpolation.secondsElapsed += Time.deltaTime;
+
+				}
+			}
+		}
+	}
+
 	// Delayed destructions
 	for (DelayedDestroyEntry &destroyEntry : gameObjectsWithDelayedDestruction)
 	{
