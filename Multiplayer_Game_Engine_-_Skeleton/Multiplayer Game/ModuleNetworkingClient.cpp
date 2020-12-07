@@ -178,24 +178,16 @@ void ModuleNetworkingClient::onPacketReceived(const InputMemoryStream &packet, c
 			if (ClientPrediction)
 			{
 				GameObject* playerGameObject = App->modLinkingContext->getNetworkGameObject(networkId);
+				InputController controller;
+
 				for (uint32 i = inputDataFront; i < inputDataBack; ++i) 
 				{
 					InputPacketData& inputPacketData = inputData[i % ArrayCount(inputData)];
-					//InputController controller;
-					//controller = inputControllerFromInputPacketData(inputPacketData, controller);
-					//controller.horizontalAxis = inputPacketData.horizontalAxis;
-					//controller.verticalAxis = inputPacketData.verticalAxis;
-					//unpackInputControllerButtons(inputPacketData.buttonBits, controller);
-
-					InputController controller;
-					controller.horizontalAxis = inputPacketData.horizontalAxis;
-					controller.verticalAxis = inputPacketData.verticalAxis;
-					unpackInputControllerButtons(inputPacketData.buttonBits, controller);
-
-					if (playerGameObject) 
-						playerGameObject->behaviour->onInput(controller/*, true*/);
-					
+					controller = inputControllerFromInputPacketData(inputPacketData, controller);			
 				}
+
+				if (playerGameObject)
+					playerGameObject->behaviour->onInput(controller);
 			}
 
 			
