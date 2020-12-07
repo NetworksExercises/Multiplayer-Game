@@ -4,7 +4,6 @@ by Aitor Simona & Victor Chen
 
 Starship is a 2D simple online shooter based in outer space. Use your skills and laser to 
 overpower your enemies! It was developed in the context of the Networks subject in CITM/UPC Barcelona.
-Programmed in C++, using Visual Studio 2019
 
 ## Instructions
 
@@ -31,6 +30,7 @@ again.
 - Client side prediction with server reconciliation, avoids laggy user input.
 Your ship moves smoothly since commands are executed asap, server may correct them, and client will recalculate 
 all unsent input. 
-- Entity interpolation makes sure all objects seem to be updated very frequently, smoother gameplay. Other
-ships and lasers have their position and angle interpolated so their movement is smooth, even if packets arrive
-with some latency movement is smooth as if it was executed locally (no jumps).
+- Entity interpolation makes sure all ships seem to be updated very frequently, smoother gameplay. Other
+ships have their position and angle interpolated so their movement is smooth, even if packets arrive
+with some latency movement is smooth as if it was executed locally (no jumps). Note that lasers are updated
+locally so there is no need for interpolation. 
