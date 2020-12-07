@@ -36,7 +36,7 @@ bool ModuleGameObject::update()
 		{
 			if (go.state == GameObject::UPDATING)
 			{
-				if (go.behaviour && go.networkId != App->modNetClient->GetNetworkID())
+				if (go.behaviour && go.behaviour->type() != BehaviourType::Laser && go.networkId != App->modNetClient->GetNetworkID())
 				{
 					float lerpTime = go.interpolation.secondsElapsed / REPLICATION_INTERVAL_SECONDS;
 					
