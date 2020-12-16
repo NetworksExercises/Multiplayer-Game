@@ -174,7 +174,8 @@ void ModuleNetworkingClient::onPacketReceived(const InputMemoryStream &packet, c
 			packet >> sequenceNumber;
 
 
-			inputDataFront = sequenceNumber;
+			if(sequenceNumber > inputDataFront)
+				inputDataFront = sequenceNumber;
 
 			if (ClientPrediction)
 			{
