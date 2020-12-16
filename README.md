@@ -1,6 +1,6 @@
 # Multiplayer Game - Starship
 
-by Aitor Simona & Victor Chen 
+by Aitor Simona
 
 Starship is a 2D simple online shooter based in outer space. Use your skills and laser to 
 overpower your enemies! It was developed in the context of the Networks subject in CITM/UPC Barcelona.
