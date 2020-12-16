@@ -109,6 +109,11 @@ void ModuleNetworkingClient::onGui()
 			ImGui::Checkbox("Client prediction", &ClientPrediction);
 
 			ImGui::Checkbox("Entity Interpolation", &EntityInterpolationTriggered);
+
+			if (playerGameObject)
+			{
+				ImGui::Text("Kills: %u", playerGameObject->kills);
+			}
 		}
 	}
 }

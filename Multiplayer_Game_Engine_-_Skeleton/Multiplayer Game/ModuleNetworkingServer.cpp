@@ -371,6 +371,20 @@ void ModuleNetworkingServer::destroyClientProxy(ClientProxy *clientProxy)
     *clientProxy = {};
 }
 
+GameObject* ModuleNetworkingServer::GetClientGo(uint32 tag)
+{
+	for (ClientProxy& clientProxy : clientProxies)
+	{
+		GameObject* clientGameObject = clientProxy.gameObject;
+		if (clientGameObject && clientGameObject->tag == tag)
+		{
+			return clientGameObject;
+		}
+	}
+
+	return nullptr;
+}
+
 
 //////////////////////////////////////////////////////////////////////
 // Spawning

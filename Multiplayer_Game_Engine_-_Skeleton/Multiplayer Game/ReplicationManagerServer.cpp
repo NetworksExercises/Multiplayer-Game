@@ -5,24 +5,12 @@
 
 void ReplicationManagerServer::create(uint32 networkId)
 {
-	//auto it = replicationCommands.find(networkId);
-	//if (it != replicationCommands.end())
-	//{
-	//	return;
-	//}
-
 	replicationCommands[networkId].action = ReplicationAction::Create;
 	replicationCommands[networkId].networkId = networkId;
 }
 
 void ReplicationManagerServer::update(uint32 networkId)
 {
-	//auto it = replicationCommands.find(networkId);
-	//if (it == replicationCommands.end())
-	//{
-	//	return;
-	//}
-
 	if (replicationCommands[networkId].action != ReplicationAction::Create
 		&& replicationCommands[networkId].action != ReplicationAction::Destroy)
 	{
@@ -33,12 +21,6 @@ void ReplicationManagerServer::update(uint32 networkId)
 
 void ReplicationManagerServer::destroy(uint32 networkId)
 {
-	//auto it = replicationCommands.find(networkId);
-	//if (it == replicationCommands.end())
-	//{
-	//	return;
-	//}
-
 	replicationCommands[networkId].action = ReplicationAction::Destroy;
 	replicationCommands[networkId].networkId = networkId;
 }
@@ -54,11 +36,6 @@ void ReplicationManagerServer::write(OutputMemoryStream& packet, ReplicationMana
 			|| replicationCommand.second.action == ReplicationAction::Update)
 		{
 
-			if (replicationCommand.second.action == ReplicationAction::Create)
-			{
-				int i = 0;
-				i++;
-			}
 			GameObject* go = App->modLinkingContext->getNetworkGameObject(replicationCommand.first);
 
 			// Serialize go fields
@@ -94,6 +71,7 @@ void ReplicationManagerServer::write(OutputMemoryStream& packet, ReplicationMana
 				go->behaviour->write(packet);
 			
 			packet.Write(go->tag);
+			packet.Write(go->kills);
 		}
 
 		deliveryDelegate->AddCommand(replicationCommand.second);
@@ -114,10 +92,6 @@ ReplicationManagerDeliveryDelegate::~ReplicationManagerDeliveryDelegate()
 
 void ReplicationManagerDeliveryDelegate::onDeliverySuccess(DeliveryManager* deliveryManager)
 {
-	//for (const ReplicationCommand& replicationCommand : replicationCommands) 
-	//{
-	//	if()
-	//}
 }
 
 void ReplicationManagerDeliveryDelegate::onDeliveryFailure(DeliveryManager* deliveryManager)
