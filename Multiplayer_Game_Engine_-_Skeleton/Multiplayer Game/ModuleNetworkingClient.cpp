@@ -172,25 +172,27 @@ void ModuleNetworkingClient::onPacketReceived(const InputMemoryStream &packet, c
 		{
 			uint32 sequenceNumber;
 			packet >> sequenceNumber;
+
+
 			inputDataFront = sequenceNumber;
-			
 
 			if (ClientPrediction)
 			{
 				GameObject* playerGameObject = App->modLinkingContext->getNetworkGameObject(networkId);
-				InputController controller;
 
 				for (uint32 i = inputDataFront; i < inputDataBack; ++i) 
-				{
+				{			
 					InputPacketData& inputPacketData = inputData[i % ArrayCount(inputData)];
-					controller = inputControllerFromInputPacketData(inputPacketData, controller);			
+					InputController controller;
+					controller = inputControllerFromInputPacketData(inputPacketData, controller);	
+
+					if (playerGameObject)
+						playerGameObject->behaviour->onInput(controller);
 				}
 
-				if (playerGameObject)
-					playerGameObject->behaviour->onInput(controller);
 			}
 
-			
+	
 		}
 	}
 }

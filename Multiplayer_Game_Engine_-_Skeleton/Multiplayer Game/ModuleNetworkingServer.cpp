@@ -169,14 +169,14 @@ void ModuleNetworkingServer::onPacketReceived(const InputMemoryStream &packet, c
 			// Process the input packet and update the corresponding game object
 			if (proxy != nullptr && IsValid(proxy->gameObject))
 			{
-				uint32 sequenceNumber = 0;
+				//uint32 sequenceNumber = 0;
 
 				// Read input data
 				while (packet.RemainingByteCount() > 0)
 				{
 					InputPacketData inputData;
 					packet >> inputData.sequenceNumber;
-					sequenceNumber = inputData.sequenceNumber;
+					//sequenceNumber = inputData.sequenceNumber;
 					packet >> inputData.horizontalAxis;
 					packet >> inputData.verticalAxis;
 					packet >> inputData.buttonBits;
@@ -188,6 +188,7 @@ void ModuleNetworkingServer::onPacketReceived(const InputMemoryStream &packet, c
 						unpackInputControllerButtons(inputData.buttonBits, proxy->gamepad);
 						proxy->gameObject->behaviour->onInput(proxy->gamepad);
 						proxy->nextExpectedInputSequenceNumber = inputData.sequenceNumber + 1;
+						//sequenceNumber = inputData.sequenceNumber;
 					}
 				}
 
@@ -195,7 +196,7 @@ void ModuleNetworkingServer::onPacketReceived(const InputMemoryStream &packet, c
 				OutputMemoryStream inputACK;
 				inputACK << PROTOCOL_ID;
 				inputACK << ServerMessage::Input;
-				inputACK << sequenceNumber;
+				inputACK << proxy->nextExpectedInputSequenceNumber;
 				sendPacket(inputACK, fromAddress);		
 			}
 		}
