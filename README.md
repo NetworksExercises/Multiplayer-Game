@@ -34,3 +34,7 @@ all unsent input.
 ships have their position and angle interpolated so their movement is smooth, even if packets arrive
 with some latency movement is smooth as if it was executed locally (no jumps). Note that lasers are updated
 locally so there is no need for interpolation. 
+
+
+Extra: Added kill marker (below entity interpolation checkbox)
+Known issues: When jitter and client prediction are enabled, the ship flickers. 
