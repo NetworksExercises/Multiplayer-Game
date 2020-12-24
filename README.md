@@ -37,4 +37,5 @@ locally so there is no need for interpolation.
 
 
 Extra: Added kill marker (below entity interpolation checkbox)
-Known issues: When jitter and client prediction are enabled, the ship flickers. 
+
+Known issues: When jitter and client prediction are enabled, the ship flickers. It looks like as the number of adjusted input actions grow, the flickers grow accordingly. No idea why this is happening.    
