@@ -90,11 +90,11 @@ ReplicationManagerDeliveryDelegate::~ReplicationManagerDeliveryDelegate()
 {
 }
 
-void ReplicationManagerDeliveryDelegate::onDeliverySuccess()
+void ReplicationManagerDeliveryDelegate::onDeliverySuccess(DeliveryManager* deliveryManager)
 {
 }
 
-void ReplicationManagerDeliveryDelegate::onDeliveryFailure()
+void ReplicationManagerDeliveryDelegate::onDeliveryFailure(DeliveryManager* deliveryManager)
 {
 	for (const ReplicationCommand& replicationCommand : replicationCommands) 
 	{

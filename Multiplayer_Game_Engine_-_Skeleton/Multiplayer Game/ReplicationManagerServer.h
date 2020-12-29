@@ -24,8 +24,8 @@ public:
 	ReplicationManagerDeliveryDelegate(ReplicationManagerServer* repManager_s);
 	~ReplicationManagerDeliveryDelegate();
 
-	void onDeliverySuccess() override;
-	void onDeliveryFailure() override;
+	void onDeliverySuccess(DeliveryManager* deliveryManager) override;
+	void onDeliveryFailure(DeliveryManager* deliveryManager) override;
 
 	void AddCommand(const ReplicationCommand& replicationCommand);
 

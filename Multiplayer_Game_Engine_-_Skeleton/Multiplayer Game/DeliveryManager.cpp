@@ -66,7 +66,7 @@ void DeliveryManager::processAckdSequenceNumbers(const InputMemoryStream& packet
 
 		if (delivery->sequenceNumber == seqNumber)
 		{
-			delivery->delegate->onDeliverySuccess();
+			delivery->delegate->onDeliverySuccess(this);
 			pending_Deliveries.erase(pending_Deliveries.begin());
 			seqNumber++;
 			delete delivery;
@@ -74,7 +74,7 @@ void DeliveryManager::processAckdSequenceNumbers(const InputMemoryStream& packet
 		else if (delivery->sequenceNumber < seqNumber)
 		{
 			pending_Deliveries.erase(pending_Deliveries.begin());
-			delivery->delegate->onDeliveryFailure();
+			delivery->delegate->onDeliveryFailure(this);
 			delete delivery;
 		}
 		else
@@ -93,7 +93,7 @@ void DeliveryManager::processTimeOutPackets()
 
 		if (Time.time - delivery->dispatchTime >= ACK_INTERVAL_SECONDS)
 		{
-			delivery->delegate->onDeliveryFailure();		
+			delivery->delegate->onDeliveryFailure(this);		
 			pending_Deliveries.erase(pending_Deliveries.begin());
 			delete delivery;
 		}
