@@ -38,13 +38,13 @@ bool ModuleGameObject::update()
 			{
 				if (go.behaviour && go.behaviour->type() != BehaviourType::Laser && go.networkId != App->modNetClient->GetNetworkID())
 				{
-					float lerpTime = go.interpolation.secondsElapsed / REPLICATION_INTERVAL_SECONDS;
+					float lerpRatio = go.interpolation.secondsElapsed / REPLICATION_INTERVAL_SECONDS;
 					
-					if (lerpTime > 1.0f)
-						lerpTime = 1.0f;
+					if (lerpRatio > 1.0f)
+						lerpRatio = 1.0f;
 
-					go.position = lerp(go.interpolation.initialPosition, go.interpolation.finalPosition, lerpTime);
-					go.angle = lerp(go.interpolation.initialAngle, go.interpolation.finalAngle, lerpTime);
+					go.position = lerp(go.interpolation.initialPosition, go.interpolation.finalPosition, lerpRatio);
+					go.angle = lerp(go.interpolation.initialAngle, go.interpolation.finalAngle, lerpRatio);
 
 					go.interpolation.secondsElapsed += Time.deltaTime;
 
